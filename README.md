@@ -1,123 +1,174 @@
-# Knowledge Organization Infrastructure - KOI API
+# RID Protocol
 
-## Setup
-First we need to setup the Python environment by running the following commands. So far this has only been tested on Python 3.12.
-```bash
-# create and activate virtual environment 'venv/'
-python -m venv venv
+Reference IDs (RIDs) identify and reference arbitrary knowledge 
+objects. They are composed of a space, a type, and a reference 
+arranged in the following way: 
+    
+    {space}.{format}:{reference}
 
-# on Windows
-.\venv\Scripts\activate
-# on Linux
-source /venv/bin/activate
+Examples:
+- `substack.post:metagov/metagov-project-spotlight-koi-pond`
+- `slack.message:TMQ3PKXT9/C06DMGNV7E0/1718870811.756359`
+- `koi.set:TEEHCqd2AOlvpf2a7olTw`
 
-# install dependencies
-pip install -r requirements.txt
-```
+Spaces represent large containers that knowledge objects are found
+in. Generally, they should represent a general access method, such
+as a platform API, but not a specific endpoint or method of 
+retrieving a resource. Conceptually they map to a platform or domain
+where many types of objects exist. In the examples above, Substack,
+Slack, and Koi are spaces.
 
-Next we will setup all of the necessary API keys. Create a file named `.env` in the root directory of the repository and copy and paste the following in:
+Formats (better name pending) are the types of objects that exist
+within spaces. They are bound to specific access methods within the
+context of the space they belong to. In the examples above Posts,
+Messages, and Sets are formats.
 
-```bash
-# .env
+Together, a space and a format form an RID type, with a defined
+method of retrieval called a dereference function. A type can be
+thought of as a "means of reference", or the way a knowledge
+object is referenced by an RID.
 
-OPENAI_API_KEY=
-PINECONE_API_KEY=
-VOYAGE_API_KEY=
-
-# only required if dereferencing Slack objects server side
-SLACK_BOT_TOKEN=
-SLACK_SIGNING_SECRET=
-```
-
-The current version requires [OpenAI](https://platform.openai.com/), [Pinecone](https://www.pinecone.io/), and [VoyageAI](https://www.voyageai.com/) API keys to function. Slack and PubPub are not required, but will throw errors if you attempt to dereference corresponding RID objects server side. (Even if you aren't using them, keep the definition with the empty string in the `.env` file or you will get an error.)
-
-
-The final component is to connect to Neo4j. If you already have a local or remote database instance setup, you can change the configured URI, authorization, and database name in `koi/config.py`.
-
-Otherwise, you can follow the instructions for your operating system here: https://neo4j.com/docs/operations-manual/current/installation/ 
-
-If you want to use the default configuration, create a local DBMS with the default name and password set to `koi-pond`.
-
-Everything is configured now, and the API server can be run with the following command:
-```bash
-python -m koi.server
-```
-
-If everything worked correctly, you should see a development server running on `http://127.0.0.1:8000`. Auto generated API documentation can be viewed at http://127.0.0.1:8000/docs.
+The final component of an RID is the reference, which provides the 
+information necessary to dereference the knowledge object it refers 
+to. One way to think of it is the input to the dereference function. 
 
 
+# RID Class Implementation
+
+The RID class provides the template for all RID types and access to
+a global constructor. It cannot be instantiated. Derived RID spaces
+and types must implement the following methods and properties:
+
+    space: str
+    format: str
+    reference: str
+
+    def from_reference(cls, reference) -> RIDType: ...
+    def dereference(self) -> DataObject: ...
+
+In addition to the basic magic methods defined (`__str__`, `__repr__`,
+`__eq__`, `__hash__`), the following properties are defined:
+
+    means: str
+    params: dict
+
+Finally, the RID class is called directly in two cases, accessing
+the following static methods:
+
+    def from_string(rid_str: str) -> RIDType: ...
+    def _add_type(Type: RIDType) -> None: ...
+
+`RID.from_string` is a global RID validator and constructor, which
+accepts any RID string and returns an instance of the corresponding
+RID type if that type has a definition. If the string is improperly
+formatted, or the type is unknown, an exception will be raised.
+
+In order to bind new types to be handled by `RID.from_string`, the 
+`RID._add_type` method should be called, passing in the RID type class.
 
 
-### Note on external services
-This system is configured to use the following external platforms (but they can be fairly easily swapped out): OpenAI's GPT-4o, Voyage AI's voyage-2 embedding model, and Pinecone's serverless vectorstore. As per OpenAI's [data privacy page](https://openai.com/enterprise-privacy/), business data is not used for training and the user retains ownership of both inputs and outputs. According to Pinecone's [trust and security page](https://www.pinecone.io/security/), their data privacy policies are compliant with a wide range of standards including CCPA, GDPR, HIPAA, and SOC 2. Voyage AI allows opting out of data training for future models on the [dashboard terms of service page](https://dash.voyageai.com/terms-of-service) (must be logged in to view), but by default applies the following data policy:
-> You retain ownership of all data and other information you provide to Voyage AI or otherwise load into the Service (including, for clarity, data provided for ‘fine tuning’ artificial intelligence models) (“Customer Content”). Unless you ‘opt out’ as described below, you grant Voyage AI (and its successors and assigns) a worldwide, irrevocable, perpetual, royalty-free, fully paid-up, right and license to use, copy, reproduce, distribute, prepare derivative works of, display and perform the Customer Content: (i) to maintain and provide you with the Service, (ii) to exercise its rights and obligations, and otherwise enforce, this Agreement, and (iii) to train, improve, and otherwise further develop the Service (such as by training the artificial intelligence models we use). Notwithstanding the foregoing, other than to our sub-processors and subcontractor acting on our behalf, we will not disclose your Customer Content to third parties other than in an aggregate and anonymized manner that does not identify you. You may opt out of our use rights in Section 3(iii) above via the opt-out functionality on the Website. If you choose to opt out, it will apply only to Customer Content you submit after the time at which you out opt. If you opt out, your Customer Content provided after such opt out will be immediately deleted by Voyage AI after it is processed for you. For clarity, any data provided prior to your opt out may continue to be subject to Section 3(iii). If you opt out, any credits or tokens for free usage of the Service may be automatically void (as determined by Voyage AI in its sole discretion).In the event you use the Service to create any Fine-Tuned Models, Voyage AI will own such models (unless otherwise agreed to by the parties in writing), but Voyage AI will not sell or otherwise share such models with third parties (but, for clarity, may share them as appropriate for Sections 3(i) and (ii) above). “Fine-Tuned Model” means an artificial intelligence neural network model that is based on parameters that are trained using data submitted by you in order to customize the model for Customer Content.
+# Implementing New RID Types
 
-If you are replicating this project, it is highly recommended that you opt-out before embedding any data.
+The RID system is designed to be easily expandable to support new
+types. Let's walk through a simple example implementing a custom 
+space and type for a made up platform called SimpleText, a 
+publishing website that serves simple text posts. Here is what the 
+URL for a SimpleText post looks like:
 
-## OLD (TODO: Update)
+    https://simpletext.com/p/my-text-post
 
-### (Knowledge) Objects
+To build a corresponding RID, we'll extract the minimum information
+needed to uniquely identify this post. In this case, the post id at 
+the end of the URL is all the information needed, and can become our
+reference. For our space and format strings, "simpletext" and "post"
+can be used, giving us the following RID:
 
-POST /object
+    simpletext.post:my-text-post
 
-```
-{
-    "rid": "string",
-    "data": {}
-}
-```
+Now we can move on to the implementation of our RID type. We'll need
+to set up a package to contain our new classes. This is the
+recommended structure:
 
-GET /object
+    my_rid_types/
+        spaces/
+            simpletext/
+                __init__.py
+                base.py
+                post.py
+            __init__.py         
+        __init__.py
+        types.py
 
+First we'll define our new space, which should be defined in base.py:
 
-```
-{
-    "rid": "string"
-}
-```
+    # my_rid_types/spaces/simpletext/base.py
 
-DELETE /object
+    from rid_lib.core import RID
 
-```
-{
-    "rid": "string"
-}
-```
+    class SimpleTextSpace(RID):
+        space = "substack"
 
-### TODO
-#### Classes
-- Base RID
-    - `space/type:reference` format
-    - dereference function
-- Relations
-    - Undirected Relation
-    - Directed Relation
-    - Undirected Assertion
-    - Directed Assertion
+Next we can define our post type:
 
-#### Endpoints
-- Objects
-    - graph actions
-        - create (observe)
-        - delete
-    - stateless actions
-        - dereference
-    - cache actions
-        - read cached data
-- Query
-    - set operations
-        - intersection
-        - union
-        - difference
-    - graph operations
-        - neighbors
-    - vector store
-        - semantic similarity
-    - text search
-- Relations
-    - create
-    - read
-    - update (assertions only)
-    - update members (assertions only)
-    - delete
-    - *(removed fork, read transactions, update definition)*
+    # my_rid_types/spaces/simpletext/post.py
+
+    import requests
+    from rid_lib.core import RID, DataObject
+    from .base import SimpleTextSpace
+
+    class SimpleTextPost(SimpleTextSpace):
+        format = "post"
+
+        def __init__(self, post_id: str):
+            self.post_id = post_id
+            self.reference = post_id
+        
+        @classmethod
+        def from_reference(cls, reference):
+            return cls(reference)
+
+        def dereference(self):
+            url = f"https://simpletext.com/p/{self.post_id}"
+            response = requests.get(url)
+
+            return DataObject(
+                json_data=response.json()
+            )
+    
+    RID._add_type(SimpleTextPost)
+
+Finally make sure to update the package imports to easily import
+your types.
+
+    # my_rid_types/spaces/simpletext/__init__.py
+
+    from .post import SimpleTextPost
+---
+    # my_rid_types/spaces/__init__.py
+
+    from . import simpletext
+---
+    # my_rid_types/types.py
+
+    from .spaces.simpletext import *
+---
+    # my_rid_types/__init_-.py
+
+    from . import spaces
+    from . import types
+
+Now we can use the new RID types in our code:
+
+    # rid_test.py
+    
+    from rid_lib.core import RID
+    from my_rid_types.types import SimpleTextPost
+    
+    post1 = RID.from_string("simpletext.post:my-text-post")
+    post2 = SimpleTextPost.from_reference("my-text-post")
+    assert post1 == post2
+    post_data_object = post1.dereference()
+    print(post_data_object.json_data)
+
+And that's it! Take a look at the included RID types for more 
+complex examples.
