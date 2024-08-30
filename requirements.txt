@@ -1,13 +1,4 @@
-fastapi
-uvicorn
-neo4j
-nanoid
-requests
 python-dotenv
-
-voyageai
-pinecone-client
-openai
+requests
 slack-bolt
-langchain_text_splitters
 html2text
