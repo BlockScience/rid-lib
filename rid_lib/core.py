@@ -56,6 +56,12 @@ class RID(metaclass=MetaRID):
     def __repr__(self):
         return f"<{self.__class__.__name__} RID '{str(self)}'>"
     
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return str(self) == str(other)
+        else:
+            return False
+    
     @classmethod
     def register_context(cls, Class):
         cls._context_table[Class.context] = Class
