@@ -1,4 +1,3 @@
-import requests
 from abc import ABCMeta, abstractmethod
 
 
