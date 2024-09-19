@@ -2,7 +2,7 @@ from rid_lib.core import RID
 
 class SlackUser(RID):
     space = "slack"
-    form = "channel"
+    form = "user"
     
     def __init__(
             self,
