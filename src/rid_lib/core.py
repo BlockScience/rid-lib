@@ -5,25 +5,18 @@ ORI_SCHEME = "ori"
 
 class MetaRID(ABCMeta):
     """Defines class properties for all RID types."""
-    @property
-    def obj_type(cls):
-        if cls.scheme == ORI_SCHEME:
-            return cls.space + "." + cls.form
-        else:
-            return None
         
     @property
     def context(cls):
         if cls.scheme == ORI_SCHEME:
-            return cls.scheme + ":" + cls.obj_type
+            return cls.scheme + ":" + cls.namespace
         else:
             return cls.scheme
 
 
 class RID(metaclass=MetaRID):
     scheme: str = ORI_SCHEME
-    space: str | None = None
-    form: str | None = None
+    namespace: str | None = None
     
     # populated at runtime
     _context_table = {}
@@ -31,20 +24,16 @@ class RID(metaclass=MetaRID):
     
     def __new__(cls, *args, **kwargs):
         if cls.scheme == ORI_SCHEME:
-            if not (cls.space and cls.form):
-                print("space and form are required for an rid")
+            if cls.namespace is None:
+                print("namespace is required for an rid")
                 
         else:
-            if cls.space or cls.form:
-                print("space and form can only be used if scheme is rid")
+            if cls.namespace is not None:
+                print("namespace can only be used if scheme is rid")
                 
         
         return super().__new__(cls)
         
-    @property
-    def obj_type(self):
-        return self.__class__.obj_type
-    
     @property
     def context(self):
         return self.__class__.context
@@ -69,17 +58,16 @@ class RID(metaclass=MetaRID):
     def _create_provisional_context(
         cls, 
         scheme: str = ORI_SCHEME, 
-        space: str | None = None,
-        form: str | None = None
+        namespace: str | None = None
     ):
         if cls._provisional_context is None:
             raise Exception("Provisional context not set")
         
         if scheme == ORI_SCHEME:
-            if (space is None) or (form is None):
+            if namespace is None:
                 raise Exception()
             
-            context_name = space.capitalize() + form.capitalize()
+            context_name = namespace
         
         else:
             context_name = scheme.capitalize()
@@ -87,7 +75,7 @@ class RID(metaclass=MetaRID):
         return type(
             context_name, 
             (cls._provisional_context,), 
-            dict(scheme=scheme, space=space, form=form)
+            dict(scheme=scheme, namespace=namespace)
         )
     
     @classmethod
@@ -99,15 +87,12 @@ class RID(metaclass=MetaRID):
         if i < 0: raise Exception()
         
         scheme = string[0:i].lower()
-        space, form = None, None
         
         if scheme == ORI_SCHEME:
             j = string.find(":", i+1)
             if j < 0: raise Exception()
             
-            obj_type = string[i+1:j]
-            if obj_type.count(".") != 1: raise Exception()
-            space, form = obj_type.split(".")
+            namespace = string[i+1:j]
             
             context = string[0:j].lower()
             reference = string[j+1:]
@@ -123,8 +108,7 @@ class RID(metaclass=MetaRID):
             if use_provisional_contexts:
                 if scheme == ORI_SCHEME:
                     ContextClass = cls._create_provisional_context(
-                        space=space,
-                        form=form
+                        namespace=namespace
                     )
                 else:
                     ContextClass = cls._create_provisional_context(
