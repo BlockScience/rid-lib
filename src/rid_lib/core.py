@@ -6,7 +6,7 @@ ORI_SCHEME = "ori"
 class MetaRID(ABCMeta):
     """Defines class properties for all RID types."""
     @property
-    def obj_type(cls):
+    def namespace(cls):
         if cls.scheme == ORI_SCHEME:
             return cls.space + "." + cls.form
         else:
@@ -15,7 +15,7 @@ class MetaRID(ABCMeta):
     @property
     def context(cls):
         if cls.scheme == ORI_SCHEME:
-            return cls.scheme + ":" + cls.obj_type
+            return cls.scheme + ":" + cls.namespace
         else:
             return cls.scheme
 
@@ -42,8 +42,8 @@ class RID(metaclass=MetaRID):
         return super().__new__(cls)
         
     @property
-    def obj_type(self):
-        return self.__class__.obj_type
+    def namespace(self):
+        return self.__class__.namespace
     
     @property
     def context(self):
@@ -105,9 +105,9 @@ class RID(metaclass=MetaRID):
             j = string.find(":", i+1)
             if j < 0: raise Exception()
             
-            obj_type = string[i+1:j]
-            if obj_type.count(".") != 1: raise Exception()
-            space, form = obj_type.split(".")
+            namespace = string[i+1:j]
+            if namespace.count(".") != 1: raise Exception()
+            space, form = namespace.split(".")
             
             context = string[0:j].lower()
             reference = string[j+1:]
