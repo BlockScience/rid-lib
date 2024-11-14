@@ -4,3 +4,4 @@ venv
 .env
 /cache
 conversations.json
+rid_lib/rid_lib.egg-info/
