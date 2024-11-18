@@ -6,17 +6,17 @@ class SlackMessage(RID):
     
     def __init__(
             self,
-            workspace_id: str,
+            team_id: str,
             channel_id: str,
             message_id: str,
         ):
-        self.workspace_id = workspace_id
+        self.team_id = team_id
         self.channel_id = channel_id
         self.message_id = message_id
             
     @property
     def reference(self):
-        return f"{self.workspace_id}/{self.channel_id}/{self.message_id}"
+        return f"{self.team_id}/{self.channel_id}/{self.message_id}"
         
     @classmethod
     def from_reference(cls, reference):
