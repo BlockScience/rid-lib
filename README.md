@@ -38,7 +38,7 @@ ORIs also implement a more complex context component: `ori:<space>.<form>`. The 
 ```
 <scheme>:<hierarchical-part>
 \______/ \_________________/
-	|                  |
+    |                  |
  context           reference
  ___|____________   ___|_____
 /                \ /         \
