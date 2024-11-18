@@ -83,7 +83,8 @@ Finally, there's the backend API call to retrieve the JSON data associated with 
 ```
 https://slack.com/api/conversations.replies?channel=C07BKQX0EVC&ts=1721669683.087619&limit=1
 ```
-These three different locators have specific use cases, but none of them work well as long term identifiers of a Slack message. None of them contain all of the identifiers needed to uniquely identify the message (the shareable link comes close, but uses the mutable team name instead of the id). Even if a locator can fully describe an object of interested, it is not resilient to changes in access method and is not designed for portability into systems where the context needs to be clearly stated and internal identifiers easily extracted. Instead, we can represent a Slack message as an ORI and resolve it to any of the above locators when necessary. 
+These three different locators have specific use cases, but none of them work well as long term identifiers of a Slack message. None of them contain all of the identifiers needed to uniquely identify the message (the shareable link comes close, but uses the mutable team name instead of the id). Even if a locator can fully describe an object of interested, it is not resilient to changes in access method and is not designed for portability into systems where the context needs to be clearly stated and internal identifiers easily extracted. Instead, we can represent a Slack message as an ORI and resolve it to any of the above locators when necessary.
+
 ## Implementation
 
 The RID class provides a template for all RID types and access to a global constructor. All RID instances have access to the following properties:
@@ -129,3 +130,6 @@ def from_reference(cls, reference):
 ```
 
 [Example implementations can be found here.](https://github.com/BlockScience/rid-lib/tree/v3/src/rid_lib/types)
+
+## Usage
+
