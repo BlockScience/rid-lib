@@ -6,15 +6,15 @@ class SlackUser(RID):
     
     def __init__(
             self,
-            workspace_id: str,
+            team_id: str,
             user_id: str,
         ):
-        self.workspace_id = workspace_id
+        self.team_id = team_id
         self.user_id = user_id
             
     @property
     def reference(self):
-        return f"{self.workspace_id}/{self.user_id}"
+        return f"{self.team_id}/{self.user_id}"
         
     @classmethod
     def from_reference(cls, reference):
