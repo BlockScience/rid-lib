@@ -131,17 +131,42 @@ def from_reference(cls, reference):
 
 ## Installation
 
-This package can be installed with pip for use in other projects:
+This package can be installed with pip for use in other projects. *Temporary solution, proper release on PyPI to come.*
+
 ```
 pip install git+https://github.com/BlockScience/rid-lib.git@v3
 ```
-*Temporary solution, proper release on PyPI to come.*
 
-It can also be built from source if you clone this repository and run:
+It can also be built and installed from source by cloning this repo and running this command in the root directory.
 ```
-python -m build
+pip install .
 ```
 
 ## Usage
 
-RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems.
+RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems. RID objects can be constructed from any RID string using the general constructor `RID.from_string`. The parser will match the string's context component and call the corresponding `from_reference` constructor. This can also be done directly on any context class via `Context.from_reference`. Finally, each context class provides a default constructor which requires each subcomponent to be indvidiually specified.
+```python
+from rid_lib import RID
+from rid_lib.types import SlackMessage
+
+rid_obj1 = RID.from_string("orn:slack.message:TA2E6KPK3/C07BKQX0EVC/1721669683.087619")
+rid_obj2 = SlackMessage.from_reference("TA2E6KPK3/C07BKQX0EVC/1721669683.087619")
+rid_obj3 = SlackMessage(team_id="TA2E6KPK3", channel_id="C07BKQX0EVC", ts="1721669683.087619")
+
+assert rid_obj1 == rid_obj2 == rid_obj3
+
+# guaranteed to be defined for all RID objects
+print(rid_obj1.scheme, rid_obj1.context, rid_obj1.reference)
+
+# special parameters for the slack.message context
+print(rid_obj1.team_id, rid_obj1.channel_id, rid_obj1.ts)
+```
+
+If an RID type hasn't been implemented as a context class, it can still be parsed by the general constructor if provisional contexts are allowed. In this case a provisional context class is generated on the fly providing the minimal RID type implementation (reference property, from_reference classmethod, \_\_init\_\_ function).
+
+```python
+test_obj1 = RID.from_string("test:one", allow_prov_ctx=True)
+test_obj2 = RID.from_string("test:one", allow_prov_ctx=True)
+
+assert test_obj1 == test_obj2
+```
