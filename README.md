@@ -31,10 +31,11 @@ Object Reference Names (ORNs) identify references to objects, or resources ident
 
 ORNs are composed using the following syntax:
 ```
-orn:<space>.<form>:<reference>
+orn:<namespace>:<reference>
 ```
+*Note: In previous versions, the namespace was split into `<space>.<form>`. Using a dot to separate a namespace in this way is still encouraged, but is not explicitly defined by this specification.*
 
-ORNs also implement a more complex context component: `orn:<space>.<form>`. The differences between the syntax of ORNs and generic URIs are summarized here:
+ORNs also implement a more complex context component: `orn:<namespace>`. The differences between the syntax of ORNs and generic URIs are summarized here:
 ```
 <scheme>:<hierarchical-part>
 \______/ \_________________/
@@ -42,7 +43,7 @@ ORNs also implement a more complex context component: `orn:<space>.<form>`. The 
  context           reference
  ___|____________   ___|_____
 /                \ /         \
-orn:<space>.<form>:<reference>
+orn:<namespace>:<reference>
 ```
 
 ## Examples
@@ -90,11 +91,9 @@ These three different locators have specific use cases, but none of them work we
 The RID class provides a template for all RID types and access to a global constructor. All RID instances have access to the following properties:
 ```python
 scheme: str
-namespace: str | None # defined for ORNs: "<space>.<form>"
-space: str | None     # defined for ORNs
-form: str | None      # defined for ORNs
+namespace: str | None # defined for ORNs
 
-context: str          # "orn:<space>.<form>" for ORNs, otherwise equal to scheme
+context: str          # "orn:<namespace>" for ORNs, otherwise equal to scheme
 reference: str        # the component after namespace component for ORNs, otherwise after the scheme component
 ```
 and the following methods:
@@ -108,9 +107,8 @@ In order to create an RID type, follow this minimal implementation:
 class TypeName:
 	# define scheme for a generic URI type
 	scheme = "scheme"
-	# OR a space and form for a ORN type
-	space = "space"
-	form = "form"
+	# OR a namespace for a ORN type
+	namespace = "namespace"
 
 # instantiates a new RID from internal components
 def __init__(self, internal_id):
