@@ -31,10 +31,11 @@ Object Reference Names (ORNs) identify references to objects, or resources ident
 
 ORNs are composed using the following syntax:
 ```
-orn:<space>.<form>:<reference>
+orn:<namespace>:<reference>
 ```
+*Note: In previous versions, the namespace was split into `<space>.<form>`. Using a dot to separate a namespace in this way is still encouraged, but is not explicitly defined by this specification.*
 
-ORNs also implement a more complex context component: `orn:<space>.<form>`. The differences between the syntax of ORNs and generic URIs are summarized here:
+ORNs also implement a more complex context component: `orn:<namespace>`. The differences between the syntax of ORNs and generic URIs are summarized here:
 ```
 <scheme>:<hierarchical-part>
 \______/ \_________________/
@@ -42,7 +43,7 @@ ORNs also implement a more complex context component: `orn:<space>.<form>`. The 
  context           reference
  ___|____________   ___|_____
 /                \ /         \
-orn:<space>.<form>:<reference>
+orn:<namespace>:<reference>
 ```
 
 ## Examples
@@ -90,11 +91,9 @@ These three different locators have specific use cases, but none of them work we
 The RID class provides a template for all RID types and access to a global constructor. All RID instances have access to the following properties:
 ```python
 scheme: str
-namespace: str | None # defined for ORNs: "<space>.<form>"
-space: str | None     # defined for ORNs
-form: str | None      # defined for ORNs
+namespace: str | None # defined for ORNs
 
-context: str          # "orn:<space>.<form>" for ORNs, otherwise equal to scheme
+context: str          # "orn:<namespace>" for ORNs, otherwise equal to scheme
 reference: str        # the component after namespace component for ORNs, otherwise after the scheme component
 ```
 and the following methods:
@@ -108,9 +107,8 @@ In order to create an RID type, follow this minimal implementation:
 class TypeName:
 	# define scheme for a generic URI type
 	scheme = "scheme"
-	# OR a space and form for a ORN type
-	space = "space"
-	form = "form"
+	# OR a namespace for a ORN type
+	namespace = "namespace"
 
 # instantiates a new RID from internal components
 def __init__(self, internal_id):
@@ -133,17 +131,42 @@ def from_reference(cls, reference):
 
 ## Installation
 
-This package can be installed with pip for use in other projects:
+This package can be installed with pip for use in other projects. *Temporary solution, proper release on PyPI to come.*
+
 ```
 pip install git+https://github.com/BlockScience/rid-lib.git@v3
 ```
-*Temporary solution, proper release on PyPI to come.*
 
-It can also be built from source if you clone this repository and run:
+It can also be built and installed from source by cloning this repo and running this command in the root directory.
 ```
-python -m build
+pip install .
 ```
 
 ## Usage
 
-RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems.
+RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems. RID objects can be constructed from any RID string using the general constructor `RID.from_string`. The parser will match the string's context component and call the corresponding `from_reference` constructor. This can also be done directly on any context class via `Context.from_reference`. Finally, each context class provides a default constructor which requires each subcomponent to be indvidiually specified.
+```python
+from rid_lib import RID
+from rid_lib.types import SlackMessage
+
+rid_obj1 = RID.from_string("orn:slack.message:TA2E6KPK3/C07BKQX0EVC/1721669683.087619")
+rid_obj2 = SlackMessage.from_reference("TA2E6KPK3/C07BKQX0EVC/1721669683.087619")
+rid_obj3 = SlackMessage(team_id="TA2E6KPK3", channel_id="C07BKQX0EVC", ts="1721669683.087619")
+
+assert rid_obj1 == rid_obj2 == rid_obj3
+
+# guaranteed to be defined for all RID objects
+print(rid_obj1.scheme, rid_obj1.context, rid_obj1.reference)
+
+# special parameters for the slack.message context
+print(rid_obj1.team_id, rid_obj1.channel_id, rid_obj1.ts)
+```
+
+If an RID type hasn't been implemented as a context class, it can still be parsed by the general constructor if provisional contexts are allowed. In this case a provisional context class is generated on the fly providing the minimal RID type implementation (reference property, from_reference classmethod, \_\_init\_\_ function).
+
+```python
+test_obj1 = RID.from_string("test:one", allow_prov_ctx=True)
+test_obj2 = RID.from_string("test:one", allow_prov_ctx=True)
+
+assert test_obj1 == test_obj2
+```

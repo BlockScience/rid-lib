@@ -1,8 +1,7 @@
-from rid_lib.core import RID
+from rid_lib.core import RID, ORN
 
-class DiscordGuild(RID):
-    space = "discord"
-    form = "guild"
+class DiscordGuild(ORN):
+    namespace = "discord.guild"
     
     def __init__(
             self,
