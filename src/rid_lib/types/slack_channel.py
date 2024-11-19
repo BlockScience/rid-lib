@@ -2,8 +2,6 @@ from rid_lib.core import RID
 
 class SlackChannel(RID):
     namespace = "slack.channel"
-    space = "slack"
-    form = "channel"
     
     def __init__(
             self,

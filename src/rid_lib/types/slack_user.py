@@ -2,9 +2,7 @@ from rid_lib.core import RID
 
 class SlackUser(RID):
     namespace = "slack.user"
-    space = "slack"
-    form = "user"
-    
+
     def __init__(
             self,
             team_id: str,

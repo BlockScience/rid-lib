@@ -1,8 +1,7 @@
 from rid_lib.core import RID
 
 class DiscordMessage(RID):
-    space = "discord"
-    form = "message"
+    namespace = "discord.message"
     
     def __init__(
             self,

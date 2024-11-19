@@ -1,8 +1,7 @@
 from rid_lib.core import RID
 
 class DiscordChannel(RID):
-    space = "discord"
-    form = "channel"
+    namespace = "discord.channel"
     
     def __init__(
             self,

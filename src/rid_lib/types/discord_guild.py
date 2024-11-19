@@ -1,8 +1,7 @@
 from rid_lib.core import RID
 
 class DiscordGuild(RID):
-    space = "discord"
-    form = "guild"
+    namespace = "discord.guild"
     
     def __init__(
             self,
