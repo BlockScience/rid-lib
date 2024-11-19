@@ -2,8 +2,6 @@ from rid_lib.core import RID
 
 class SlackMessage(RID):
     namespace = "slack.message"
-    space = "slack"
-    form = "message"
     
     def __init__(
             self,

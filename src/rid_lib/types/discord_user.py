@@ -1,8 +1,7 @@
 from rid_lib.core import RID
 
 class DiscordUser(RID):
-    space = "discord"
-    form = "user"
+    namespace = "discord.user"
     
     def __init__(
             self,
