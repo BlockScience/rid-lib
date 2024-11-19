@@ -1,27 +1,27 @@
 from abc import ABCMeta, abstractmethod
 
 
-ORI_SCHEME = "ori"
+ORN_SCHEME = "orn"
 
 class MetaRID(ABCMeta):
     """Defines class properties for all RID types."""
     @property
     def namespace(cls):
-        if cls.scheme == ORI_SCHEME:
+        if cls.scheme == ORN_SCHEME:
             return cls.space + "." + cls.form
         else:
             return None
         
     @property
     def context(cls):
-        if cls.scheme == ORI_SCHEME:
+        if cls.scheme == ORN_SCHEME:
             return cls.scheme + ":" + cls.namespace
         else:
             return cls.scheme
 
 
 class RID(metaclass=MetaRID):
-    scheme: str = ORI_SCHEME
+    scheme: str = ORN_SCHEME
     space: str | None = None
     form: str | None = None
     
@@ -30,7 +30,7 @@ class RID(metaclass=MetaRID):
     _provisional_context = None
     
     def __new__(cls, *args, **kwargs):
-        if cls.scheme == ORI_SCHEME:
+        if cls.scheme == ORN_SCHEME:
             if not (cls.space and cls.form):
                 print("space and form are required for an rid")
                 
@@ -68,14 +68,14 @@ class RID(metaclass=MetaRID):
     @classmethod
     def _create_provisional_context(
         cls, 
-        scheme: str = ORI_SCHEME, 
+        scheme: str = ORN_SCHEME, 
         space: str | None = None,
         form: str | None = None
     ):
         if cls._provisional_context is None:
             raise Exception("Provisional context not set")
         
-        if scheme == ORI_SCHEME:
+        if scheme == ORN_SCHEME:
             if (space is None) or (form is None):
                 raise Exception()
             
@@ -101,7 +101,7 @@ class RID(metaclass=MetaRID):
         scheme = string[0:i].lower()
         space, form = None, None
         
-        if scheme == ORI_SCHEME:
+        if scheme == ORN_SCHEME:
             j = string.find(":", i+1)
             if j < 0: raise Exception()
             
@@ -121,7 +121,7 @@ class RID(metaclass=MetaRID):
         
         else:            
             if use_provisional_contexts:
-                if scheme == ORI_SCHEME:
+                if scheme == ORN_SCHEME:
                     ContextClass = cls._create_provisional_context(
                         space=space,
                         form=form

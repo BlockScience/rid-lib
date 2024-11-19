@@ -23,18 +23,18 @@ The generic syntax to compose an RID roughly mirrors URIS:
 ```
 
 Conceptually, the reference refers to the referent, while the context provides context for how to interpret the reference, or how to discriminate it from another otherwise identical RID. While in many cases the context simply maps to a URI scheme, the context may also include part of the "hierarchical part" (right hand side of a URI following the scheme).
-## Object Reference Identifiers (previously RID v2)
+## Object Reference Names (previously RID v2)
 
-The major change from RID v2 to v3 was building compatibility with URIs, and as a result the previous RID v2 style identifiers are now implemented under the (unofficial) `ori:` URI scheme. 
+The major change from RID v2 to v3 was building compatibility with URIs, and as a result the previous RID v2 style identifiers are now implemented under the (unofficial) `orn:` URI scheme. 
 
-Object Reference Identifiers (ORIs) identify references to objects, or resources identified independent of their access method. Given the previous definitions of identifiers, ORIs can be considered "names". They are intended to be used with existing resources which may already have well defined identifiers. An ORI identifies a resource by "dislocating" it from a specific access mechanism, maintaining a reference even if the underlying locator changes or breaks. ORIs are generally formed from one or more context specific identifiers which can be easily accessed for processing in other contexts.
+Object Reference Names (ORNs) identify references to objects, or resources identified independent of their access method. Given the previous definitions of identifiers, ORNs can be considered "names". They are intended to be used with existing resources which may already have well defined identifiers. An ORN identifies a resource by "dislocating" it from a specific access mechanism, maintaining a reference even if the underlying locator changes or breaks. ORNs are generally formed from one or more context specific identifiers which can be easily accessed for processing in other contexts.
 
-ORIs are composed using the following syntax:
+ORNs are composed using the following syntax:
 ```
-ori:<space>.<form>:<reference>
+orn:<space>.<form>:<reference>
 ```
 
-ORIs also implement a more complex context component: `ori:<space>.<form>`. The differences between the syntax of ORIs and generic URIs are summarized here:
+ORNs also implement a more complex context component: `orn:<space>.<form>`. The differences between the syntax of ORNs and generic URIs are summarized here:
 ```
 <scheme>:<hierarchical-part>
 \______/ \_________________/
@@ -42,7 +42,7 @@ ORIs also implement a more complex context component: `ori:<space>.<form>`. The 
  context           reference
  ___|____________   ___|_____
 /                \ /         \
-ori:<space>.<form>:<reference>
+orn:<space>.<form>:<reference>
 ```
 
 ## Examples
@@ -59,19 +59,19 @@ https://github.com/BlockScience/rid-lib/blob/v3/README.md
 context                   reference
 ```
 
-The Slack objects are implemented as ORIs, and include workspaces, channels, messages, and users. The Slack message object's namespace is `slack.message` and its reference component is composed of three internal identifiers, the workspace id, channel id, and message id.
+The Slack objects are implemented as ORNs, and include workspaces, channels, messages, and users. The Slack message object's namespace is `slack.message` and its reference component is composed of three internal identifiers, the workspace id, channel id, and message id.
 
 ```
 scheme namespace     team      channel      timestamp
  |   _____|_____   ___|___    ____|___   _______|_______
 / \ /           \ /       \ /         \ /               \
-ori:slack.message:TA2E6KPK3/C07BKQX0EVC/1721669683.087619
+orn:slack.message:TA2E6KPK3/C07BKQX0EVC/1721669683.087619
 \_______________/ \_____________________________________/
         |                            |
      context                     reference
 ```
 
-By representing Slack messages through ORIs, a stable identifier can be assigned to a resource which can be mapped to existing locators for different use cases. For example, a Slack message can be represented as a shareable link which redirects to the Slack app or in browser app: 
+By representing Slack messages through ORNs, a stable identifier can be assigned to a resource which can be mapped to existing locators for different use cases. For example, a Slack message can be represented as a shareable link which redirects to the Slack app or in browser app: 
 ```
 https://blockscienceteam.slack.com/archives/C07BKQX0EVC/p1721669683087619`
 ```
@@ -83,19 +83,19 @@ Finally, there's the backend API call to retrieve the JSON data associated with 
 ```
 https://slack.com/api/conversations.replies?channel=C07BKQX0EVC&ts=1721669683.087619&limit=1
 ```
-These three different locators have specific use cases, but none of them work well as long term identifiers of a Slack message. None of them contain all of the identifiers needed to uniquely identify the message (the shareable link comes close, but uses the mutable team name instead of the id). Even if a locator can fully describe an object of interested, it is not resilient to changes in access method and is not designed for portability into systems where the context needs to be clearly stated and internal identifiers easily extracted. Instead, we can represent a Slack message as an ORI and resolve it to any of the above locators when necessary.
+These three different locators have specific use cases, but none of them work well as long term identifiers of a Slack message. None of them contain all of the identifiers needed to uniquely identify the message (the shareable link comes close, but uses the mutable team name instead of the id). Even if a locator can fully describe an object of interested, it is not resilient to changes in access method and is not designed for portability into systems where the context needs to be clearly stated and internal identifiers easily extracted. Instead, we can represent a Slack message as an ORN and resolve it to any of the above locators when necessary.
 
 ## Implementation
 
 The RID class provides a template for all RID types and access to a global constructor. All RID instances have access to the following properties:
 ```python
 scheme: str
-namespace: str | None # defined for ORIs: "<space>.<form>"
-space: str | None     # defined for ORIs
-form: str | None      # defined for ORIs
+namespace: str | None # defined for ORNs: "<space>.<form>"
+space: str | None     # defined for ORNs
+form: str | None      # defined for ORNs
 
-context: str          # "ori:<space>.<form>" for ORIs, otherwise equal to scheme
-reference: str        # the component after namespace component for ORIs, otherwise after the scheme component
+context: str          # "orn:<space>.<form>" for ORNs, otherwise equal to scheme
+reference: str        # the component after namespace component for ORNs, otherwise after the scheme component
 ```
 and the following methods:
 ```python
@@ -108,7 +108,7 @@ In order to create an RID type, follow this minimal implementation:
 class TypeName:
 	# define scheme for a generic URI type
 	scheme = "scheme"
-	# OR a space and form for a ORI type
+	# OR a space and form for a ORN type
 	space = "space"
 	form = "form"
 
@@ -131,5 +131,19 @@ def from_reference(cls, reference):
 
 [Example implementations can be found here.](https://github.com/BlockScience/rid-lib/tree/v3/src/rid_lib/types)
 
+## Installation
+
+This package can be installed with pip for use in other projects:
+```
+pip install git+https://github.com/BlockScience/rid-lib.git@v3
+```
+*Temporary solution, proper release on PyPI to come.*
+
+It can also be built from source if you clone this repository and run:
+```
+python -m build
+```
+
 ## Usage
 
+RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems.
