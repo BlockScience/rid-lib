@@ -1,8 +1,7 @@
-from rid_lib.core import RID
+from rid_lib.core import RID, ORN
 
-class DiscordMessage(RID):
-    space = "discord"
-    form = "message"
+class DiscordMessage(ORN):
+    namespace = "discord.message"
     
     def __init__(
             self,

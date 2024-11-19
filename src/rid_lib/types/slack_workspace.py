@@ -1,9 +1,8 @@
-from rid_lib.core import RID
+from rid_lib.core import RID, ORN
 
-class SlackWorkspace(RID):
-    space = "slack"
-    form = "workspace"
-    
+class SlackWorkspace(ORN):
+    namespace = "slack.workspace"
+
     def __init__(
             self,
             team_id: str,
