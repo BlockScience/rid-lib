@@ -1,8 +1,8 @@
 from rid_lib.core import RID
 
-class SlackTeam(RID):
+class SlackWorkspace(RID):
     space = "slack"
-    form = "team"
+    form = "workspace"
     
     def __init__(
             self,
@@ -18,4 +18,4 @@ class SlackTeam(RID):
     def from_reference(cls, reference):
         return cls(reference)
                 
-RID.register_context(SlackTeam)
+RID.register_context(SlackWorkspace)
