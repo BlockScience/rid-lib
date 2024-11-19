@@ -1,174 +1,149 @@
-# RID Protocol
+# RID v3 Protocol
 
-Reference IDs (RIDs) identify and reference arbitrary knowledge 
-objects. They are composed of a space, a type, and a reference 
-arranged in the following way: 
-    
-    {space}.{format}:{reference}
+*This specification can be understood as the third iteration of the RID protocol, or RID v3. Previous versions include [RID v1](https://github.com/BlockScience/kms-identity/blob/main/README.md) and [RID v2](https://github.com/BlockScience/rid-lib/blob/v2/README.md).*
+## Introduction
 
-Examples:
-- `substack.post:metagov/metagov-project-spotlight-koi-pond`
-- `slack.message:TMQ3PKXT9/C06DMGNV7E0/1718870811.756359`
-- `koi.set:TEEHCqd2AOlvpf2a7olTw`
+*Note: throughout this document the terms "resource", "digital object", and "knowledge object" are used roughly interchangeably.*
 
-Spaces represent large containers that knowledge objects are found
-in. Generally, they should represent a general access method, such
-as a platform API, but not a specific endpoint or method of 
-retrieving a resource. Conceptually they map to a platform or domain
-where many types of objects exist. In the examples above, Substack,
-Slack, and Koi are spaces.
+Reference Identifiers (RIDs) identify references to resources primarily for usage within Knowledge Organization Infrastructure (KOI). The RID specification is informed by previous work on representing digital objects (see [Objects as Reference](https://blog.block.science/objects-as-reference-toward-robust-first-principles-of-digital-organization/)) in which objects are identified through a relationship between a reference and a referent. Under this model, RIDs are the *references*, and the resources they refer to are the *referents.* The *means of reference* describes the relationship between the reference and referent.
 
-Formats (better name pending) are the types of objects that exist
-within spaces. They are bound to specific access methods within the
-context of the space they belong to. In the examples above Posts,
-Messages, and Sets are formats.
+```
+(reference) -[means of reference]-> (referent)
+```
 
-Together, a space and a format form an RID type, with a defined
-method of retrieval called a dereference function. A type can be
-thought of as a "means of reference", or the way a knowledge
-object is referenced by an RID.
+As opposed to Uniform Resource Identifiers (URIs), RIDs are not intended to have universal agreement or a centralized management structure. However, RIDs are compatible with URIs in that *all URIs can be valid RIDs*. [RFC 3986](https://www.rfc-editor.org/info/rfc3986) outlines the basic properties of an URI, adding that "a URI can be further classified as a locator, a name or both." Location and naming can be considered two different means of reference, or methods of linking a reference and referent(s), where:
 
-The final component of an RID is the reference, which provides the 
-information necessary to dereference the knowledge object it refers 
-to. One way to think of it is the input to the dereference function. 
+1. Locators identify resources by *where* they are, with the referent being defined as the resource retrieved via a defined access method. This type of identifier is less stable, and the resource at the specified location could change or become unavailable over time.
+3. Names identify resources by *what* they are, acting as a more stable, location independent identifier. Resources identified by name are not always intended to be accessed, but some may be resolvable to locators. While the mapping from name to locator may not be constant the broader relationship between reference and referent should be.
+## Generic Syntax
 
+The generic syntax to compose an RID roughly mirrors URIS:
+```
+<context>:<reference>
+```
 
-# RID Class Implementation
+Conceptually, the reference refers to the referent, while the context provides context for how to interpret the reference, or how to discriminate it from another otherwise identical RID. While in many cases the context simply maps to a URI scheme, the context may also include part of the "hierarchical part" (right hand side of a URI following the scheme).
+## Object Reference Names (previously RID v2)
 
-The RID class provides the template for all RID types and access to
-a global constructor. It cannot be instantiated. Derived RID spaces
-and types must implement the following methods and properties:
+The major change from RID v2 to v3 was building compatibility with URIs, and as a result the previous RID v2 style identifiers are now implemented under the (unofficial) `orn:` URI scheme. 
 
-    space: str
-    format: str
-    reference: str
+Object Reference Names (ORNs) identify references to objects, or resources identified independent of their access method. Given the previous definitions of identifiers, ORNs can be considered "names". They are intended to be used with existing resources which may already have well defined identifiers. An ORN identifies a resource by "dislocating" it from a specific access mechanism, maintaining a reference even if the underlying locator changes or breaks. ORNs are generally formed from one or more context specific identifiers which can be easily accessed for processing in other contexts.
 
-    def from_reference(cls, reference) -> RIDType: ...
-    def dereference(self) -> DataObject: ...
+ORNs are composed using the following syntax:
+```
+orn:<space>.<form>:<reference>
+```
 
-In addition to the basic magic methods defined (`__str__`, `__repr__`,
-`__eq__`, `__hash__`), the following properties are defined:
+ORNs also implement a more complex context component: `orn:<space>.<form>`. The differences between the syntax of ORNs and generic URIs are summarized here:
+```
+<scheme>:<hierarchical-part>
+\______/ \_________________/
+    |                  |
+ context           reference
+ ___|____________   ___|_____
+/                \ /         \
+orn:<space>.<form>:<reference>
+```
 
-    means: str
-    params: dict
+## Examples
 
-Finally, the RID class is called directly in two cases, accessing
-the following static methods:
+In the current version there are two example implementations of RID types: HTTP/S URLs and Slack objects. The HTTP/S scheme is the most commonly used form of URI and uses the standard RID parsing, where the scheme `http` or `https` is equal to the context, and the hierarchical part is equal to the reference. 
 
-    def from_string(rid_str: str) -> RIDType: ...
-    def _add_type(Type: RIDType) -> None: ...
+```
+scheme  authority                  path
+ _|_     ____|___  _________________|___________________
+/   \   /        \/                                     \
+https://github.com/BlockScience/rid-lib/blob/v3/README.md
+\___/ \_________________________________________________/
+  |                           |
+context                   reference
+```
 
-`RID.from_string` is a global RID validator and constructor, which
-accepts any RID string and returns an instance of the corresponding
-RID type if that type has a definition. If the string is improperly
-formatted, or the type is unknown, an exception will be raised.
+The Slack objects are implemented as ORNs, and include workspaces, channels, messages, and users. The Slack message object's namespace is `slack.message` and its reference component is composed of three internal identifiers, the workspace id, channel id, and message id.
 
-In order to bind new types to be handled by `RID.from_string`, the 
-`RID._add_type` method should be called, passing in the RID type class.
+```
+scheme namespace     team      channel      timestamp
+ |   _____|_____   ___|___    ____|___   _______|_______
+/ \ /           \ /       \ /         \ /               \
+orn:slack.message:TA2E6KPK3/C07BKQX0EVC/1721669683.087619
+\_______________/ \_____________________________________/
+        |                            |
+     context                     reference
+```
 
+By representing Slack messages through ORNs, a stable identifier can be assigned to a resource which can be mapped to existing locators for different use cases. For example, a Slack message can be represented as a shareable link which redirects to the Slack app or in browser app: 
+```
+https://blockscienceteam.slack.com/archives/C07BKQX0EVC/p1721669683087619`
+```
+There's also a "deep link" which can open the Slack app directly (but only to a channel):
+```
+slack://open?team=TA2E6KPK3&id=C07BKQX0EVC
+```
+Finally, there's the backend API call to retrieve the JSON data associated with the message:
+```
+https://slack.com/api/conversations.replies?channel=C07BKQX0EVC&ts=1721669683.087619&limit=1
+```
+These three different locators have specific use cases, but none of them work well as long term identifiers of a Slack message. None of them contain all of the identifiers needed to uniquely identify the message (the shareable link comes close, but uses the mutable team name instead of the id). Even if a locator can fully describe an object of interested, it is not resilient to changes in access method and is not designed for portability into systems where the context needs to be clearly stated and internal identifiers easily extracted. Instead, we can represent a Slack message as an ORN and resolve it to any of the above locators when necessary.
 
-# Implementing New RID Types
+## Implementation
 
-The RID system is designed to be easily expandable to support new
-types. Let's walk through a simple example implementing a custom 
-space and type for a made up platform called SimpleText, a 
-publishing website that serves simple text posts. Here is what the 
-URL for a SimpleText post looks like:
+The RID class provides a template for all RID types and access to a global constructor. All RID instances have access to the following properties:
+```python
+scheme: str
+namespace: str | None # defined for ORNs: "<space>.<form>"
+space: str | None     # defined for ORNs
+form: str | None      # defined for ORNs
 
-    https://simpletext.com/p/my-text-post
+context: str          # "orn:<space>.<form>" for ORNs, otherwise equal to scheme
+reference: str        # the component after namespace component for ORNs, otherwise after the scheme component
+```
+and the following methods:
+```python
+def from_string(string: str): ... # returns instance of RID
+def from_reference(string: str): ... # returns instance of RID, only callable from RID type classes, not base class
+```
 
-To build a corresponding RID, we'll extract the minimum information
-needed to uniquely identify this post. In this case, the post id at 
-the end of the URL is all the information needed, and can become our
-reference. For our space and format strings, "simpletext" and "post"
-can be used, giving us the following RID:
+In order to create an RID type, follow this minimal implementation:
+```python
+class TypeName:
+	# define scheme for a generic URI type
+	scheme = "scheme"
+	# OR a space and form for a ORN type
+	space = "space"
+	form = "form"
 
-    simpletext.post:my-text-post
+# instantiates a new RID from internal components
+def __init__(self, internal_id):
+	self.internal_id = internal_id
 
-Now we can move on to the implementation of our RID type. We'll need
-to set up a package to contain our new classes. This is the
-recommended structure:
+# returns the reference component
+@property
+def reference(self):
+	# should dynamically reflect changes to any internal ids
+	return self.internal_id
 
-    my_rid_types/
-        spaces/
-            simpletext/
-                __init__.py
-                base.py
-                post.py
-            __init__.py         
-        __init__.py
-        types.py
+# instantiates of an RID of this type given a reference
+@classmethod
+def from_reference(cls, reference):
+	# in a typical use case, the reference would need to be parsed
+	return cls(reference)
+```
 
-First we'll define our new space, which should be defined in base.py:
+[Example implementations can be found here.](https://github.com/BlockScience/rid-lib/tree/v3/src/rid_lib/types)
 
-    # my_rid_types/spaces/simpletext/base.py
+## Installation
 
-    from rid_lib.core import RID
+This package can be installed with pip for use in other projects:
+```
+pip install git+https://github.com/BlockScience/rid-lib.git@v3
+```
+*Temporary solution, proper release on PyPI to come.*
 
-    class SimpleTextSpace(RID):
-        space = "substack"
+It can also be built from source if you clone this repository and run:
+```
+python -m build
+```
 
-Next we can define our post type:
+## Usage
 
-    # my_rid_types/spaces/simpletext/post.py
-
-    import requests
-    from rid_lib.core import RID, DataObject
-    from .base import SimpleTextSpace
-
-    class SimpleTextPost(SimpleTextSpace):
-        format = "post"
-
-        def __init__(self, post_id: str):
-            self.post_id = post_id
-            self.reference = post_id
-        
-        @classmethod
-        def from_reference(cls, reference):
-            return cls(reference)
-
-        def dereference(self):
-            url = f"https://simpletext.com/p/{self.post_id}"
-            response = requests.get(url)
-
-            return DataObject(
-                json_data=response.json()
-            )
-    
-    RID._add_type(SimpleTextPost)
-
-Finally make sure to update the package imports to easily import
-your types.
-
-    # my_rid_types/spaces/simpletext/__init__.py
-
-    from .post import SimpleTextPost
----
-    # my_rid_types/spaces/__init__.py
-
-    from . import simpletext
----
-    # my_rid_types/types.py
-
-    from .spaces.simpletext import *
----
-    # my_rid_types/__init_-.py
-
-    from . import spaces
-    from . import types
-
-Now we can use the new RID types in our code:
-
-    # rid_test.py
-    
-    from rid_lib.core import RID
-    from my_rid_types.types import SimpleTextPost
-    
-    post1 = RID.from_string("simpletext.post:my-text-post")
-    post2 = SimpleTextPost.from_reference("my-text-post")
-    assert post1 == post2
-    post_data_object = post1.dereference()
-    print(post_data_object.json_data)
-
-And that's it! Take a look at the included RID types for more 
-complex examples.
+RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems.

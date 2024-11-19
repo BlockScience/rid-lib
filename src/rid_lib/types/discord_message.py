@@ -1,21 +1,20 @@
 from rid_lib.core import RID
 
-class SlackUser(RID):
-    namespace = "slack.user"
-    space = "slack"
-    form = "user"
+class DiscordMessage(RID):
+    space = "discord"
+    form = "message"
     
     def __init__(
             self,
-            workspace_id: str,
-            user_id: str,
+            channel_id: str,
+            message_id: str
         ):
-        self.workspace_id = workspace_id
-        self.user_id = user_id
+        self.channel_id = channel_id
+        self.message_id = message_id
             
     @property
     def reference(self):
-        return f"{self.workspace_id}/{self.user_id}"
+        return f"{self.channel_id}/{self.message_id}"
         
     @classmethod
     def from_reference(cls, reference):
@@ -23,4 +22,4 @@ class SlackUser(RID):
         if len(components) == 2:
             return cls(*components)
                 
-RID.register_context(SlackUser)
+RID.register_context(DiscordMessage)
