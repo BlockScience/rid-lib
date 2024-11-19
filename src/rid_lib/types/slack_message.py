@@ -8,15 +8,15 @@ class SlackMessage(RID):
             self,
             team_id: str,
             channel_id: str,
-            message_id: str,
+            ts: str,
         ):
         self.team_id = team_id
         self.channel_id = channel_id
-        self.message_id = message_id
+        self.ts = ts
             
     @property
     def reference(self):
-        return f"{self.team_id}/{self.channel_id}/{self.message_id}"
+        return f"{self.team_id}/{self.channel_id}/{self.ts}"
         
     @classmethod
     def from_reference(cls, reference):
