@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from .exceptions import *
 
 
 ORN_SCHEME = "orn"
@@ -8,32 +9,26 @@ class MetaRID(ABCMeta):
         
     @property
     def context(cls):
-        if cls.scheme == ORN_SCHEME:
+        if cls.scheme is None:
+            raise RIDTypeError(f"Scheme undefined for RID type {repr(cls)}")
+        
+        elif cls.scheme == ORN_SCHEME:
+            if cls.namespace is None:
+                raise RIDTypeError(f"Namespace undefined for ORN based RID type {repr(cls)}") 
+            
             return cls.scheme + ":" + cls.namespace
         else:
             return cls.scheme
 
 
 class RID(metaclass=MetaRID):
-    scheme: str = ORN_SCHEME
+    scheme: str = None
     namespace: str | None = None
     
     # populated at runtime
     _context_table = {}
     _provisional_context = None
     
-    def __new__(cls, *args, **kwargs):
-        if cls.scheme == ORN_SCHEME:
-            if cls.namespace is None:
-                print("namespace is required for an rid")
-                
-        else:
-            if cls.namespace is not None:
-                print("namespace can only be used if scheme is rid")
-                
-        
-        return super().__new__(cls)
-        
     @property
     def context(self):
         return self.__class__.context
@@ -57,16 +52,13 @@ class RID(metaclass=MetaRID):
     @classmethod
     def _create_provisional_context(
         cls, 
-        scheme: str = ORN_SCHEME, 
+        scheme: str, 
         namespace: str | None = None
     ):
         if cls._provisional_context is None:
             raise Exception("Provisional context not set")
         
         if scheme == ORN_SCHEME:
-            if namespace is None:
-                raise Exception()
-            
             context_name = namespace
         
         else:
@@ -79,35 +71,38 @@ class RID(metaclass=MetaRID):
         )
     
     @classmethod
-    def from_string(cls, string: str, use_provisional_contexts=False):
-        if not isinstance(string, str): raise Exception()
+    def from_string(cls, rid_string: str, allow_prov_ctx=False):
+        if not isinstance(rid_string, str): raise Exception()
         
-        i = string.find(":")
+        i = rid_string.find(":")
         
-        if i < 0: raise Exception()
+        if i < 0: 
+            raise InvalidRIDError(f"Failed to parse RID string '{rid_string}', missing context delimeter ':'")
         
-        scheme = string[0:i].lower()
+        scheme = rid_string[0:i].lower()
         
         if scheme == ORN_SCHEME:
-            j = string.find(":", i+1)
-            if j < 0: raise Exception()
+            j = rid_string.find(":", i+1)
+            if j < 0:
+                raise InvalidRIDError(f"Failed to parse ORN RID string '{rid_string}', missing namespace delimeter ':'")
             
-            namespace = string[i+1:j]
+            namespace = rid_string[i+1:j]
             
-            context = string[0:j].lower()
-            reference = string[j+1:]
+            context = rid_string[0:j].lower()
+            reference = rid_string[j+1:]
         
         else:
-            context = string[0:i].lower()
-            reference = string[i+1:]
+            context = rid_string[0:i].lower()
+            reference = rid_string[i+1:]
         
         if context in cls._context_table:
             ContextClass = cls._context_table[context]
         
         else:            
-            if use_provisional_contexts:
+            if allow_prov_ctx:
                 if scheme == ORN_SCHEME:
                     ContextClass = cls._create_provisional_context(
+                        scheme=scheme,
                         namespace=namespace
                     )
                 else:
@@ -115,7 +110,7 @@ class RID(metaclass=MetaRID):
                         scheme=scheme
                     )
             else:
-                raise Exception()
+                raise InvalidRIDError(f"Context '{context}' undefined for RID string '{rid_string}' (enable provisional contexts to avoid this error with `allow_prov_ctx=True`)")
                 
         return ContextClass.from_reference(reference)
     
@@ -144,3 +139,6 @@ class ProvisionalContext(RID):
 
 RID._provisional_context = ProvisionalContext
 
+
+class ORN(RID):
+    scheme = ORN_SCHEME

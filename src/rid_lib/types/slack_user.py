@@ -1,6 +1,6 @@
-from rid_lib.core import RID
+from rid_lib.core import RID, ORN
 
-class SlackUser(RID):
+class SlackUser(ORN):
     namespace = "slack.user"
 
     def __init__(
