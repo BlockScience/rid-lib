@@ -1,6 +1,6 @@
-from rid_lib.core import RID
+from rid_lib.core import RID, ORN
 
-class SlackMessage(RID):
+class SlackMessage(ORN):
     namespace = "slack.message"
     
     def __init__(

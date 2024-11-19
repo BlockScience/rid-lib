@@ -1,6 +1,6 @@
-from rid_lib.core import RID
+from rid_lib.core import RID, ORN
 
-class DiscordMessage(RID):
+class DiscordMessage(ORN):
     namespace = "discord.message"
     
     def __init__(

@@ -1,6 +1,6 @@
-from rid_lib.core import RID
+from rid_lib.core import RID, ORN
 
-class DiscordChannel(RID):
+class DiscordChannel(ORN):
     namespace = "discord.channel"
     
     def __init__(
