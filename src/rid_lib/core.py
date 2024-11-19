@@ -59,7 +59,9 @@ class RID(metaclass=MetaRID):
             raise Exception("Provisional context not set")
         
         if scheme == ORN_SCHEME:
-            context_name = namespace
+            context_name = "".join([
+                s.capitalize() for s in namespace.split(".")
+            ])
         
         else:
             context_name = scheme.capitalize()
