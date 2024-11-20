@@ -20,7 +20,7 @@ class SlackMessage(ORN):
     @classmethod
     def from_reference(cls, reference):
         components = reference.split("/")
-        if len(components) in (3, 4):
+        if len(components) == 3:
             return cls(*components)
                 
 RID.register_context(SlackMessage)
