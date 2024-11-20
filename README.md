@@ -162,11 +162,22 @@ print(rid_obj1.scheme, rid_obj1.context, rid_obj1.reference)
 print(rid_obj1.team_id, rid_obj1.channel_id, rid_obj1.ts)
 ```
 
-If an RID type hasn't been implemented as a context class, it can still be parsed by the general constructor if provisional contexts are allowed. In this case a provisional context class is generated on the fly providing the minimal RID type implementation (reference property, from_reference classmethod, \_\_init\_\_ function).
+If an RID type hasn't been implemented as a context class, it can still be parsed by the general constructor if provisional contexts are allowed. In this case a provisional context class is generated on the fly providing the minimal RID type implementation (`reference` property, `from_reference` class method, `__init__` function).
 
 ```python
 test_obj1 = RID.from_string("test:one", allow_prov_ctx=True)
 test_obj2 = RID.from_string("test:one", allow_prov_ctx=True)
 
 assert test_obj1 == test_obj2
+```
+
+## Development
+
+Build and install from source with development requirements:
+```
+pip install .[dev]
+```
+Run unit tests:
+```
+pytest --cov=rid_lib
 ```
