@@ -39,10 +39,10 @@ ORNs also implement a more complex context component: `orn:<namespace>`. The dif
 ```
 <scheme>:<hierarchical-part>
 \______/ \_________________/
-    |                  |
- context           reference
- ___|____________   ___|_____
-/                \ /         \
+    |                |
+ context         reference
+ ___|_________   ____|____
+/             \ /         \
 orn:<namespace>:<reference>
 ```
 
