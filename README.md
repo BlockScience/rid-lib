@@ -131,10 +131,9 @@ class TypeName:
 
 ## Installation
 
-This package can be installed with pip for use in other projects. *Temporary solution, proper release on PyPI to come.*
-
+This package can be installed with pip for use in other projects.
 ```
-pip install git+https://github.com/BlockScience/rid-lib.git@v3
+pip install rid-lib
 ```
 
 It can also be built and installed from source by cloning this repo and running this command in the root directory.
