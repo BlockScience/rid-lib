@@ -110,21 +110,21 @@ class TypeName:
 	# OR a namespace for a ORN type
 	namespace = "namespace"
 
-# instantiates a new RID from internal components
-def __init__(self, internal_id):
-	self.internal_id = internal_id
-
-# returns the reference component
-@property
-def reference(self):
-	# should dynamically reflect changes to any internal ids
-	return self.internal_id
-
-# instantiates of an RID of this type given a reference
-@classmethod
-def from_reference(cls, reference):
-	# in a typical use case, the reference would need to be parsed
-	return cls(reference)
+	# instantiates a new RID from internal components
+	def __init__(self, internal_id):
+		self.internal_id = internal_id
+	
+	# returns the reference component
+	@property
+	def reference(self):
+		# should dynamically reflect changes to any internal ids
+		return self.internal_id
+	
+	# instantiates of an RID of this type given a reference
+	@classmethod
+	def from_reference(cls, reference):
+		# in a typical use case, the reference would need to be parsed
+		return cls(reference)
 ```
 
 [Example implementations can be found here.](https://github.com/BlockScience/rid-lib/tree/v3/src/rid_lib/types)
