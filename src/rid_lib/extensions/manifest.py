@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from .core import RID
-from .utils import hash_json
+from rid_lib.core import RID
+from .utils import sha256_hash_json
 
 
 @dataclass
@@ -15,18 +15,18 @@ class Manifest:
         return cls(
             rid=rid,
             timestamp=datetime.now(timezone.utc),
-            sha256_hash=hash_json(data)
+            sha256_hash=sha256_hash_json(data)
         )
         
     @classmethod
-    def from_dict(cls, d: dict):
+    def from_json(cls, data: dict):
         return cls(
-            rid=RID.from_string(d.get("rid")),
-            timestamp=datetime.fromisoformat(d.get("timestamp")),
-            sha256_hash=d.get("sha256_hash")
+            rid=RID.from_string(data["rid"]),
+            timestamp=datetime.fromisoformat(data["timestamp"]),
+            sha256_hash=data["sha256_hash"]
         )
         
-    def to_dict(self):
+    def to_json(self):
         return {
             "rid": str(self.rid),
             "timestamp": self.timestamp.isoformat(),
