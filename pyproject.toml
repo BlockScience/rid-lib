@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rid-lib"
-version = "3.0.0-beta.1"
+version = "3.0.0"
 description = "Implementation of Reference Identifiers (RIDs) protocol in Python"
 authors = [
     {name = "Luke Miller", email = "luke@block.science"}
@@ -14,7 +14,12 @@ requires-python = ">=3.10"
 license = {file = "LICENSE"}
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "pytest-cov>=6.0"]
+dev = ["pytest>=8.0", "pytest-cov>=6.0", "twine>=6.0"]
 
 [project.urls]
 Homepage = "https://github.com/BlockScience/rid-lib/"
+
+[tool.coverage.report]
+exclude_also = [
+    "@abstractmethod"
+]

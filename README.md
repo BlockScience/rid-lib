@@ -180,3 +180,13 @@ Run unit tests:
 ```
 pytest --cov=rid_lib
 ```
+To build and upload to PyPI:
+(Remember to bump the version number in pyproject.toml first!)
+```
+python -m build
+```
+Two new build files should appear in `dist/`, a `.tar.gz` and `.whl` file.
+```
+python -m twine upload --repository pypi dist/*
+```
+Enter the API key and upload the new package version.
