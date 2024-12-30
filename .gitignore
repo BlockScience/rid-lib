@@ -6,3 +6,5 @@ build/
 *.egg*
 testing/
 .coverage
+rid_cache/
+htmlcov/

@@ -1,11 +1,12 @@
 import pytest
-from rid_lib.core import RID
+from rid_lib.core import RID, ORN
 from rid_lib.exceptions import InvalidRIDError
 
 def test_uri_rid_string():
     rid_string = "https://github.com/BlockScience/rid-lib/"
     rid_obj = RID.from_string(rid_string)
     
+    assert isinstance(rid_obj, RID)
     assert rid_obj.scheme == "https"
     assert rid_obj.namespace == None
     assert rid_obj.context == "https"
@@ -17,6 +18,8 @@ def test_orn_rid_string():
     rid_string = "orn:slack.message:TMQ3PKXT9/C0175M3GLSU/1698205575.367209"
     rid_obj = RID.from_string(rid_string)
     
+    assert isinstance(rid_obj, RID)
+    assert isinstance(rid_obj, ORN)
     assert rid_obj.scheme == "orn"
     assert rid_obj.namespace == "slack.message"
     assert rid_obj.context == "orn:slack.message"
@@ -44,9 +47,4 @@ def test_invalid_rid_string():
 def test_invalid_orn_rid_string():
     with pytest.raises(InvalidRIDError):
         rid_obj = RID.from_string("orn:test")
-        
-# def test_abstractmethod_from_reference():
-#     RID.from_reference("reference")
-    
-    
     
