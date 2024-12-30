@@ -6,20 +6,25 @@ ORN_SCHEME = "orn"
 
 class MetaRID(ABCMeta):
     """Defines class properties for all RID types."""
+    
+    @staticmethod
+    def validate_rid_type_definition(RIDType):
+        if RIDType.scheme is None:
+            raise RIDTypeError(f"Scheme undefined for RID type {repr(RIDType)}")
+        
+        elif RIDType.scheme == ORN_SCHEME:
+            if RIDType.namespace is None:
+                raise RIDTypeError(f"Namespace undefined for ORN based RID type {repr(RIDType)}") 
         
     @property
     def context(cls):
-        if cls.scheme is None:
-            raise RIDTypeError(f"Scheme undefined for RID type {repr(cls)}")
+        MetaRID.validate_rid_type_definition(cls)
         
-        elif cls.scheme == ORN_SCHEME:
-            if cls.namespace is None:
-                raise RIDTypeError(f"Namespace undefined for ORN based RID type {repr(cls)}") 
-            
+        if cls.scheme == ORN_SCHEME:
             return cls.scheme + ":" + cls.namespace
         else:
             return cls.scheme
-
+        
 
 class RID(metaclass=MetaRID):
     scheme: str = None
@@ -49,6 +54,7 @@ class RID(metaclass=MetaRID):
     
     @classmethod
     def register_context(cls, Class):
+        MetaRID.validate_rid_type_definition(Class)
         cls._context_table[Class.context] = Class
     
     @classmethod

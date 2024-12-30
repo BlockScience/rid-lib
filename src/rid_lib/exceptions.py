@@ -1,8 +1,8 @@
 class RIDError(Exception):
     pass
 
-class RIDTypeError(Exception):
+class RIDTypeError(RIDError):
     pass
 
-class InvalidRIDError(Exception):
+class InvalidRIDError(RIDError):
     pass
