@@ -30,6 +30,8 @@ class RID(metaclass=MetaRID):
     scheme: str = None
     namespace: str | None = None
     
+    using_prov_ctx = False
+    
     # populated at runtime
     _context_table = {}
     _provisional_context_table = {}
@@ -58,8 +60,8 @@ class RID(metaclass=MetaRID):
         cls._context_table[Class.context] = Class
     
     @classmethod
-    def from_string(cls, rid_string: str, allow_prov_ctx=False):
-        if not isinstance(rid_string, str): raise Exception()
+    def from_string(cls, rid_string: str, allow_prov_ctx=True):
+        if not isinstance(rid_string, str): raise InvalidRIDError("rid_string must be of type 'str'")
         
         i = rid_string.find(":")
         
@@ -124,6 +126,11 @@ class RID(metaclass=MetaRID):
 
 
 class ProvisionalContext(RID):
+    using_prov_ctx = True
+    
+    def __repr__(self):
+        return f"<{self.__class__.__name__} RID '{str(self)}' (Provisional Context)>"
+    
     def __init__(self, reference):
         self._reference = reference
         
