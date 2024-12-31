@@ -12,6 +12,7 @@ class Manifest:
     
     @classmethod
     def generate(cls, rid: RID, data: dict):
+        """Generates a Manifest using the current time and hashing the provided data."""
         return cls(
             rid=rid,
             timestamp=datetime.now(timezone.utc),
@@ -26,7 +27,7 @@ class Manifest:
             sha256_hash=data["sha256_hash"]
         )
         
-    def to_json(self):
+    def to_json(self) -> dict:
         return {
             "rid": str(self.rid),
             "timestamp": self.timestamp.isoformat(),

@@ -13,6 +13,8 @@ def test_prov_ctx_rid_string():
     assert rid_obj.reference == "reference"
     assert str(rid_obj) == rid_string
     
+    repr(rid_obj)
+    
     rid_obj2 = RID.from_string(rid_string)
     
     assert rid_obj == rid_obj2
@@ -27,6 +29,8 @@ def test_prov_ctx_orn_rid_string():
     assert rid_obj.context == "orn:test"
     assert rid_obj.reference == "reference"
     assert str(rid_obj) == rid_string
+    
+    repr(rid_obj)
     
     rid_obj2 = RID.from_string(rid_string)
     

@@ -17,13 +17,18 @@ class Event:
     
     @classmethod
     def from_json(cls, data: dict):
+        if data["manifest"] is None:
+            manifest = None
+        else:
+            manifest = Manifest.from_json(data["manifest"])
+        
         return cls(
             rid=data["rid"],
             event_type=data["event_type"],
-            manifest=Manifest.from_json(data["manifest"]) if data["manifest"] else None
+            manifest=manifest
         )
     
-    def to_json(self):
+    def to_json(self) -> dict:
         return {
             "rid": str(self.rid),
             "event_type": self.event_type,
