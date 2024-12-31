@@ -23,7 +23,7 @@ class Event:
             manifest = Manifest.from_json(data["manifest"])
         
         return cls(
-            rid=data["rid"],
+            rid=RID.from_string(data["rid"]),
             event_type=data["event_type"],
             manifest=manifest
         )
