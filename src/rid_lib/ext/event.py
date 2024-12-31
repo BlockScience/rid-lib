@@ -20,6 +20,7 @@ class Event:
         return cls(
             rid=data["rid"],
             event_type=data["event_type"],
+            manifest=Manifest.from_json(data["manifest"]) if data["manifest"] else None
         )
     
     def to_json(self):
