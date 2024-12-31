@@ -1,24 +1,25 @@
+import pytest
 from rid_lib.core import RID
 from rid_lib.ext import Manifest
-from rid_lib.ext.cache import Cache, CacheEntry
+from rid_lib.ext.cache import Cache, CacheBundle
 
-def test_cache_entry_constructors():
+def test_cache_bundle_constructors():
     rid = RID.from_string("test:rid")
     data = {
         "val": "test"
     }
     
-    cache_entry = CacheEntry(
+    cache_bundle = CacheBundle(
         Manifest.generate(rid, data),
         data
     )
     
-    cache_entry_json = cache_entry.to_json()
+    cache_bundle_json = cache_bundle.to_json()
     
-    assert cache_entry == CacheEntry.from_json(cache_entry_json)
+    assert cache_bundle == CacheBundle.from_json(cache_bundle_json)
     
 def test_cache_functions():
-    cache = Cache()
+    cache = Cache(".rid_cache")
     rid = RID.from_string("test:rid")
     data = {
         "val": "test"
@@ -28,14 +29,18 @@ def test_cache_functions():
     
     assert cache.exists(rid) == False
     
-    cache_entry = cache.write(rid, data)
+    cache_bundle = CacheBundle(
+        Manifest.generate(rid, data), data
+    )
     
-    assert cache_entry.manifest.rid == rid
-    assert cache_entry.contents == data
+    cache.write(rid, cache_bundle)
+    
+    assert cache_bundle.manifest.rid == rid
+    assert cache_bundle.contents == data
     
     assert cache.exists(rid) == True
     
-    assert cache.read(rid) == cache_entry
+    assert cache.read(rid) == cache_bundle
     
     assert cache.read_all_rids() == [rid]
     
@@ -45,3 +50,19 @@ def test_cache_functions():
     
     cache.delete(rid)
     cache.drop()
+
+def test_invalid_cache_write():
+    cache = Cache(".rid_cache")
+    rid = RID.from_string("test:rid")
+    other_rid = RID.from_string("test:other")
+    data = {
+        "val": "test"
+    }
+    
+    cache_bundle = CacheBundle(
+        Manifest.generate(other_rid, data), 
+        data
+    )
+    
+    with pytest.raises(ValueError):
+        cache.write(rid, cache_bundle)
