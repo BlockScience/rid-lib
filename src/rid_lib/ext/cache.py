@@ -1,10 +1,10 @@
 import os
 import json
 import shutil
-from dataclasses import dataclass
 from rid_lib.core import RID
 from .manifest import Manifest
 from .utils import b64_encode, b64_decode
+from .pydantic_adapter import dataclass
 
 
 @dataclass
