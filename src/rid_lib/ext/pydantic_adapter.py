@@ -2,21 +2,31 @@ from rid_lib.core import RID
 from rid_lib.exceptions import RIDError
 
 try:
-    from pydantic.dataclasses import dataclass
+    import pydantic
+    
+except ImportError:
+    USING_PYDANTIC = False
+    
+    print("WARNING: You are using rid_lib extensions without additional dependencies, features will be limited. Install with `pip install rid_lib[ext]`.")
+    
+    RIDFieldAnnotation = None
+    
+else:
     USING_PYDANTIC = True
 
-    from typing import Any, Annotated
-    from pydantic_core import core_schema
+    from typing import Any
     from pydantic import GetCoreSchemaHandler, GetJsonSchemaHandler
     from pydantic.json_schema import JsonSchemaValue
+    from pydantic_core import core_schema, CoreSchema
 
-    class RIDPydanticAnnotation:
+
+    class RIDFieldAnnotation:
         @classmethod
         def __get_pydantic_core_schema__(
             cls,
             _source_type: Any,
             _handler: GetCoreSchemaHandler
-        ) -> core_schema.CoreSchema:
+        ) -> CoreSchema:
             
             def validate_from_str(value: str) -> RID:
                 result = RID.from_string(value)
@@ -45,15 +55,7 @@ try:
         @classmethod
         def __get_pydantic_json_schema__(
             cls, 
-            _core_schema: core_schema.CoreSchema, 
+            _core_schema: CoreSchema, 
             handler: GetJsonSchemaHandler
         ) -> JsonSchemaValue:
             return handler(core_schema.str_schema())
-                
-except ImportError:
-    from dataclasses import dataclass
-    USING_PYDANTIC = False
-
-
-RIDField = Annotated[RID, RIDPydanticAnnotation] if USING_PYDANTIC else RID
-    
