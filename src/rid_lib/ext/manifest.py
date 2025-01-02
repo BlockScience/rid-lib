@@ -1,12 +1,14 @@
 from datetime import datetime, timezone
+from typing import Annotated
+from pydantic.dataclasses import dataclass
 from rid_lib.core import RID
 from .utils import sha256_hash_json, JSONSerializable
-from .pydantic_adapter import dataclass, RIDField
+from .pydantic_adapter import RIDFieldAnnotation
 
 
 @dataclass
 class Manifest(JSONSerializable):
-    rid: RIDField
+    rid: Annotated[RID, RIDFieldAnnotation]
     timestamp: datetime
     sha256_hash: str
     

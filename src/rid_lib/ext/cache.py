@@ -1,14 +1,14 @@
 import os
 import json
 import shutil
+from pydantic.dataclasses import dataclass
 from rid_lib.core import RID
 from .manifest import Manifest
-from .utils import b64_encode, b64_decode
-from .pydantic_adapter import dataclass
+from .utils import b64_encode, b64_decode, JSONSerializable
 
 
 @dataclass
-class CacheBundle:
+class CacheBundle(JSONSerializable):
     """Object representing an individual RID cache entry.
 
     A container object for the cached data associated with an RID. It is 
@@ -17,19 +17,6 @@ class CacheBundle:
     """
     manifest: Manifest
     contents: dict | None = None
-    
-    @classmethod
-    def from_json(cls, data: dict):
-        return cls(
-            manifest=Manifest.from_json(data["manifest"]),
-            contents=data["contents"]
-        )
-
-    def to_json(self) -> dict: 
-        return {
-            "manifest": self.manifest.to_json(),
-            "contents": self.contents,
-        }
 
 
 class Cache:
