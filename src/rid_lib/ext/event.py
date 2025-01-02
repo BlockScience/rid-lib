@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 from enum import StrEnum
 from rid_lib.core import RID
 from .manifest import Manifest
-
+from .pydantic_adapter import dataclass, RIDField
+from .utils import JSONSerializable
 
 class EventType(StrEnum):
     NEW = "NEW"
@@ -10,27 +10,7 @@ class EventType(StrEnum):
     FORGET = "FORGET"
 
 @dataclass
-class Event:
-    rid: RID
+class Event(JSONSerializable):
+    rid: RIDField
     event_type: EventType
     manifest: Manifest | None = None
-    
-    @classmethod
-    def from_json(cls, data: dict):
-        if data["manifest"] is None:
-            manifest = None
-        else:
-            manifest = Manifest.from_json(data["manifest"])
-        
-        return cls(
-            rid=RID.from_string(data["rid"]),
-            event_type=data["event_type"],
-            manifest=manifest
-        )
-    
-    def to_json(self) -> dict:
-        return {
-            "rid": str(self.rid),
-            "event_type": self.event_type,
-            "manifest": self.manifest.to_json() if self.manifest else None
-        }
