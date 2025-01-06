@@ -9,6 +9,7 @@ except ImportError:
     
     print("WARNING: You are using rid_lib extensions without additional dependencies, features will be limited. Install with `pip install rid_lib[ext]`.")
     
+    from dataclasses import dataclass
     RIDFieldAnnotation = None
     
 else:
@@ -19,6 +20,7 @@ else:
     from pydantic.json_schema import JsonSchemaValue
     from pydantic_core import core_schema, CoreSchema
 
+    from pydantic.dataclasses import dataclass
 
     class RIDFieldAnnotation:
         @classmethod
