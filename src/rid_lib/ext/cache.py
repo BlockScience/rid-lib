@@ -1,8 +1,8 @@
 import os
 import json
 import shutil
-from pydantic.dataclasses import dataclass
 from rid_lib.core import RID
+from .pydantic_adapter import dataclass
 from .manifest import Manifest
 from .utils import b64_encode, b64_decode, JSONSerializable
 

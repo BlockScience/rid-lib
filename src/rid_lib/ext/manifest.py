@@ -1,9 +1,8 @@
 from datetime import datetime, timezone
 from typing import Annotated
-from pydantic.dataclasses import dataclass
 from rid_lib.core import RID
 from .utils import sha256_hash_json, JSONSerializable
-from .pydantic_adapter import RIDFieldAnnotation
+from .pydantic_adapter import RIDFieldAnnotation, dataclass
 
 
 @dataclass
