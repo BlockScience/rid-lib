@@ -48,8 +48,8 @@ class Effector:
         else:
             return None
         
-    def register_dereference(self, *args, **kwargs):
-        return self.register(ActionType.dereference, *args, **kwargs)
+    def register_dereference(self, rid_type: Type[RID] | str | tuple[Type[RID] | str]):
+        return self.register(ActionType.dereference, rid_type)
         
     def dereference(
         self, 
