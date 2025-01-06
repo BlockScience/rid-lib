@@ -1,4 +1,4 @@
-from rid_lib.core import RID, ORN
+from rid_lib.core import ORN
 
 class SlackUser(ORN):
     namespace = "slack.user"
@@ -20,5 +20,3 @@ class SlackUser(ORN):
         components = reference.split("/")
         if len(components) == 2:
             return cls(*components)
-                
-RID.register_context(SlackUser)
