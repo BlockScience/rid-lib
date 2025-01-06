@@ -31,6 +31,7 @@ class RID(metaclass=MetaRID):
     scheme: str = None
     namespace: str | None = None
     
+    exclude_from_rid_types: bool = True
     using_prov_ctx: bool = False
     
     # populated at runtime
@@ -54,11 +55,15 @@ class RID(metaclass=MetaRID):
             return str(self) == str(other)
         else:
             return False
-    
-    @classmethod
-    def register_context(cls, RIDType: Type):
-        MetaRID.validate_rid_type_definition(RIDType)
-        cls._context_table[RIDType.context] = RIDType
+        
+    def __init_subclass__(cls):
+        if 'exclude_from_rid_types' in vars(cls):
+            return
+        else:
+            cls.exclude_from_rid_types = False
+        
+        MetaRID.validate_rid_type_definition(cls)
+        RID._context_table[cls.context] = cls
     
     @classmethod
     def from_string(cls, rid_string: str, allow_prov_ctx: bool = True):
@@ -127,6 +132,8 @@ class RID(metaclass=MetaRID):
 
 
 class ProvisionalContext(RID):
+    exclude_from_rid_types = True
+    
     using_prov_ctx = True
     
     def __repr__(self):
@@ -147,4 +154,6 @@ RID._ProvisionalContext = ProvisionalContext
 
 
 class ORN(RID):
+    exclude_from_rid_types = True
+    
     scheme = ORN_SCHEME

@@ -29,6 +29,3 @@ class HTTP(RID):
 
 class HTTPS(HTTP):
     scheme = "https"
-
-RID.register_context(HTTP)
-RID.register_context(HTTPS)

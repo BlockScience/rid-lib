@@ -1,4 +1,4 @@
-from rid_lib.core import RID, ORN
+from rid_lib.core import ORN
 
 class SlackWorkspace(ORN):
     namespace = "slack.workspace"
@@ -16,5 +16,3 @@ class SlackWorkspace(ORN):
     @classmethod
     def from_reference(cls, reference):
         return cls(reference)
-                
-RID.register_context(SlackWorkspace)
