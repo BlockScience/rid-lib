@@ -15,13 +15,13 @@ class Effector:
         
     def __getattr__(self, action_type):
         def execute(rid: RID, *args, **kwargs):
-            return self.execute(action_type, rid)
+            return self.execute(action_type, rid, *args, **kwargs)
         return execute
         
     def register(
         self, 
         action_type: ActionType, 
-        rid_type: Type[RID] | str | tuple[RID | str]
+        rid_type: Type[RID] | str | tuple[Type[RID] | str]
     ):
         def decorator(func):
             if isinstance(rid_type, (list, tuple)):
@@ -30,7 +30,7 @@ class Effector:
                 rid_types = (rid_type,)
             
             for _rid_type in rid_types:
-                if issubclass(_rid_type, RID):
+                if isinstance(_rid_type, type) and issubclass(_rid_type, RID):
                     context = _rid_type.context
                 else:
                     context = _rid_type         
