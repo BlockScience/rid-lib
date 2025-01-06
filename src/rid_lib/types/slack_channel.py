@@ -1,4 +1,4 @@
-from rid_lib.core import RID, ORN
+from rid_lib.core import ORN
 
 class SlackChannel(ORN):
     namespace = "slack.channel"
@@ -20,5 +20,3 @@ class SlackChannel(ORN):
         components = reference.split("/")
         if len(components) == 2:
             return cls(*components)
-                
-RID.register_context(SlackChannel)

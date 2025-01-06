@@ -1,4 +1,4 @@
-from rid_lib.core import RID, ORN
+from rid_lib.core import ORN
 
 class SlackMessage(ORN):
     namespace = "slack.message"
@@ -22,5 +22,3 @@ class SlackMessage(ORN):
         components = reference.split("/")
         if len(components) == 3:
             return cls(*components)
-                
-RID.register_context(SlackMessage)

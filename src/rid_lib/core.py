@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Type
 from .exceptions import *
 
 
@@ -8,7 +9,7 @@ class MetaRID(ABCMeta):
     """Defines class properties for all RID types."""
     
     @staticmethod
-    def validate_rid_type_definition(RIDType):
+    def validate_rid_type_definition(RIDType: Type):
         if RIDType.scheme is None:
             raise RIDTypeError(f"Scheme undefined for RID type {repr(RIDType)}")
         
@@ -30,11 +31,14 @@ class RID(metaclass=MetaRID):
     scheme: str = None
     namespace: str | None = None
     
-    # populated at runtime
-    _context_table = {}
-    _provisional_context_table = {}
+    exclude_from_rid_types: bool = True
+    using_prov_ctx: bool = False
     
-    _ProvisionalContext = None
+    # populated at runtime
+    _context_table: dict[str, Type] = {}
+    _provisional_context_table: dict[str, Type] = {}
+    
+    _ProvisionalContext: Type = None
     
     @property
     def context(self):
@@ -51,15 +55,19 @@ class RID(metaclass=MetaRID):
             return str(self) == str(other)
         else:
             return False
+        
+    def __init_subclass__(cls):
+        if 'exclude_from_rid_types' in vars(cls):
+            return
+        else:
+            cls.exclude_from_rid_types = False
+        
+        MetaRID.validate_rid_type_definition(cls)
+        RID._context_table[cls.context] = cls
     
     @classmethod
-    def register_context(cls, Class):
-        MetaRID.validate_rid_type_definition(Class)
-        cls._context_table[Class.context] = Class
-    
-    @classmethod
-    def from_string(cls, rid_string: str, allow_prov_ctx=False):
-        if not isinstance(rid_string, str): raise Exception()
+    def from_string(cls, rid_string: str, allow_prov_ctx: bool = True):
+        if not isinstance(rid_string, str): raise InvalidRIDError("rid_string must be of type 'str'")
         
         i = rid_string.find(":")
         
@@ -85,12 +93,12 @@ class RID(metaclass=MetaRID):
         
         
         if context in cls._context_table:
-            ContextClass = cls._context_table[context]
+            RIDType = cls._context_table[context]
         
         elif allow_prov_ctx:
             if context in cls._provisional_context_table:
                 # use existing provisional context class
-                ContextClass = cls._provisional_context_table[context]
+                RIDType = cls._provisional_context_table[context]
             
             else:
                 # create new provisional context class
@@ -101,16 +109,16 @@ class RID(metaclass=MetaRID):
                 else:
                     prov_context_classname = scheme.capitalize()
                 
-                ContextClass = type(
+                RIDType = type(
                     prov_context_classname, 
                     (cls._ProvisionalContext,), 
                     dict(scheme=scheme, namespace=namespace)
                 )
-                cls._provisional_context_table[context] = ContextClass
+                cls._provisional_context_table[context] = RIDType
         else:
             raise InvalidRIDError(f"Context '{context}' undefined for RID string '{rid_string}' (enable provisional contexts to avoid this error with `allow_prov_ctx=True`)")
                 
-        return ContextClass.from_reference(reference)
+        return RIDType.from_reference(reference)
     
     @classmethod
     @abstractmethod
@@ -124,6 +132,13 @@ class RID(metaclass=MetaRID):
 
 
 class ProvisionalContext(RID):
+    exclude_from_rid_types = True
+    
+    using_prov_ctx = True
+    
+    def __repr__(self):
+        return f"<{self.__class__.__name__} RID '{str(self)}' (Provisional Context)>"
+    
     def __init__(self, reference):
         self._reference = reference
         
@@ -139,4 +154,6 @@ RID._ProvisionalContext = ProvisionalContext
 
 
 class ORN(RID):
+    exclude_from_rid_types = True
+    
     scheme = ORN_SCHEME
