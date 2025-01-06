@@ -1,5 +1,9 @@
+from typing import Callable
 from rid_lib.core import RID
 from rid_lib.exceptions import RIDError
+
+
+dataclass: Callable
 
 try:
     import pydantic
