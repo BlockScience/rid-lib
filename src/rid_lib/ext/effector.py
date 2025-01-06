@@ -60,7 +60,6 @@ class Effector:
         if self.cache is not None and hit_cache is True and refresh is False:
             bundle = self.cache.read(rid)
             if bundle is not None and bundle.contents is not None:
-                print("hit cache")
                 return bundle
         
         raw_data = self.execute(ActionType.dereference, rid)        
