@@ -1,6 +1,10 @@
+import pytest
 from rid_lib import RID
 from rid_lib.ext import Event, EventType, Manifest
+from rid_lib.ext.pydantic_adapter import USING_PYDANTIC
 
+
+@pytest.mark.skipif(not USING_PYDANTIC, reason="Pydantic not available")
 def test_event_equivalency():
     rid = RID.from_string("test:rid")
     m = Manifest.generate(rid, {})
