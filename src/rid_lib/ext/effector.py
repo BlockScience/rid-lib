@@ -71,10 +71,13 @@ class Effector:
         
         raw_data = self.execute(ActionType.dereference, rid)
         
-        if raw_data is None: return
-            
-        manifest = Manifest.generate(rid, raw_data)
-        bundle = CacheBundle(manifest, raw_data)
+        if raw_data is None: 
+            return
+        elif isinstance(raw_data, CacheBundle):
+            bundle = raw_data
+        else:            
+            manifest = Manifest.generate(rid, raw_data)
+            bundle = CacheBundle(manifest, raw_data)
         
         if (
             self.cache is not None and 
