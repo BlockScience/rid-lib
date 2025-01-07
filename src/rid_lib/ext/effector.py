@@ -57,16 +57,29 @@ class Effector:
         hit_cache=True, # tries to read cache first, writes to cache if there is a miss
         refresh=False   # refreshes cache even if there was a hit
     ):
-        if self.cache is not None and hit_cache is True and refresh is False:
+        if (
+            self.cache is not None and 
+            hit_cache is True and 
+            refresh is False
+        ):
             bundle = self.cache.read(rid)
-            if bundle is not None and bundle.contents is not None:
+            if (
+                bundle is not None and 
+                bundle.contents is not None
+            ):
                 return bundle
         
-        raw_data = self.execute(ActionType.dereference, rid)        
+        raw_data = self.execute(ActionType.dereference, rid)
+        
+        if raw_data is None: return
+            
         manifest = Manifest.generate(rid, raw_data)
         bundle = CacheBundle(manifest, raw_data)
         
-        if self.cache is not None and hit_cache is True:
+        if (
+            self.cache is not None and 
+            hit_cache is True
+        ):
             self.cache.write(rid, bundle)
         
         return bundle
