@@ -1,8 +1,9 @@
 from enum import StrEnum
 from typing import Annotated
+from pydantic.dataclasses import dataclass
 from rid_lib.core import RID
 from .manifest import Manifest
-from .pydantic_adapter import RIDFieldAnnotation, dataclass
+from .pydantic_adapter import RIDFieldAnnotation
 from .utils import JSONSerializable
 
 

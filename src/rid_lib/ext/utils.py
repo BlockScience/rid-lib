@@ -4,7 +4,6 @@ from base64 import urlsafe_b64encode, urlsafe_b64decode
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from rid_lib import RID
-from .pydantic_adapter import USING_PYDANTIC
 
 
 def sha256_hash_json(data: dict):
@@ -42,8 +41,4 @@ class JSONSerializable:
     
     @classmethod
     def from_json(cls, data: dict):
-        if USING_PYDANTIC:
-            return cls(**data)
-        else:
-            raise ImportError("Pydantic is necessary for JSON deserialization, install with `pip install rid_lib[ext]`")
-        
+        return cls(**data)        

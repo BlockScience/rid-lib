@@ -20,6 +20,12 @@ dev = ["pytest>=8.0", "pytest-cov>=6.0", "twine>=6.0"]
 [project.urls]
 Homepage = "https://github.com/BlockScience/rid-lib/"
 
+[tool.pytest.ini_options]
+minversion = 6.0
+testpaths = [
+    "tests"
+]
+
 [tool.coverage.report]
 exclude_also = [
     "@abstractmethod"

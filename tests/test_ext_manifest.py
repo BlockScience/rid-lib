@@ -1,10 +1,13 @@
 from datetime import datetime, timezone
 import pytest
 from rid_lib.core import RID
-from rid_lib.ext import Manifest, utils
-from rid_lib.ext.pydantic_adapter import USING_PYDANTIC
 
-@pytest.mark.skipif(not USING_PYDANTIC, reason="Pydantic not available")
+from rid_lib.ext import RID_EXT_ENABLED
+if RID_EXT_ENABLED:
+    from rid_lib.ext import Manifest, utils
+
+
+@pytest.mark.skipif(not RID_EXT_ENABLED, reason="Missing rid-lib ext dependencies")
 def test_manifest_constructors():
     rid = RID.from_string("test:rid")
     
@@ -18,6 +21,7 @@ def test_manifest_constructors():
     
     assert manifest == Manifest.from_json(manifest_json)
 
+@pytest.mark.skipif(not RID_EXT_ENABLED, reason="Missing rid-lib ext dependencies")
 def test_manifest_generate():
     rid = RID.from_string("test:rid")
     data = {
