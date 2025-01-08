@@ -1,10 +1,12 @@
 import pytest
 from rid_lib import RID
-from rid_lib.ext import Event, EventType, Manifest
-from rid_lib.ext.pydantic_adapter import USING_PYDANTIC
+
+from rid_lib.ext import RID_EXT_ENABLED
+if RID_EXT_ENABLED:
+    from rid_lib.ext import Event, EventType, Manifest
 
 
-@pytest.mark.skipif(not USING_PYDANTIC, reason="Pydantic not available")
+@pytest.mark.skipif(not RID_EXT_ENABLED, reason="Missing rid-lib ext dependencies")
 def test_event_equivalency():
     rid = RID.from_string("test:rid")
     m = Manifest.generate(rid, {})

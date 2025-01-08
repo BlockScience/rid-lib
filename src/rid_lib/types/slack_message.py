@@ -1,4 +1,7 @@
 from rid_lib.core import ORN
+from .slack_channel import SlackChannel
+from .slack_workspace import SlackWorkspace
+
 
 class SlackMessage(ORN):
     namespace = "slack.message"
@@ -16,6 +19,19 @@ class SlackMessage(ORN):
     @property
     def reference(self):
         return f"{self.team_id}/{self.channel_id}/{self.ts}"
+    
+    @property
+    def workspace(self):
+        return SlackWorkspace(
+            self.team_id
+        )
+    
+    @property
+    def channel(self):
+        return SlackChannel(
+            self.team_id,
+            self.channel_id
+        )
         
     @classmethod
     def from_reference(cls, reference):

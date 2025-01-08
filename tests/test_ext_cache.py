@@ -1,11 +1,13 @@
 import pytest
 from rid_lib.core import RID
-from rid_lib.ext import Manifest
-from rid_lib.ext.cache import Cache, CacheBundle
-from rid_lib.ext.pydantic_adapter import USING_PYDANTIC
+
+from rid_lib.ext import RID_EXT_ENABLED
+if RID_EXT_ENABLED:
+    from rid_lib.ext import Manifest
+    from rid_lib.ext.cache import Cache, CacheBundle
 
 
-@pytest.mark.skipif(not USING_PYDANTIC, reason="Pydantic not available")
+@pytest.mark.skipif(not RID_EXT_ENABLED, reason="Missing rid-lib ext dependencies")
 def test_cache_bundle_constructors():
     rid = RID.from_string("test:rid")
     data = {
@@ -21,7 +23,7 @@ def test_cache_bundle_constructors():
     
     assert cache_bundle == CacheBundle.from_json(cache_bundle_json)
 
-@pytest.mark.skipif(not USING_PYDANTIC, reason="Pydantic not available")
+@pytest.mark.skipif(not RID_EXT_ENABLED, reason="Missing rid-lib ext dependencies")
 def test_cache_functions():
     cache = Cache(".rid_cache")
     rid = RID.from_string("test:rid")
@@ -55,7 +57,7 @@ def test_cache_functions():
     cache.delete(rid)
     cache.drop()
 
-@pytest.mark.skipif(not USING_PYDANTIC, reason="Pydantic not available")
+@pytest.mark.skipif(not RID_EXT_ENABLED, reason="Missing rid-lib ext dependencies")
 def test_invalid_cache_write():
     cache = Cache(".rid_cache")
     rid = RID.from_string("test:rid")

@@ -1,5 +1,6 @@
 from rid_lib.core import ORN
 
+
 class SlackWorkspace(ORN):
     namespace = "slack.workspace"
 

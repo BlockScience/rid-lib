@@ -1,6 +1,19 @@
 # RID v3 Protocol
 
 *This specification can be understood as the third iteration of the RID protocol, or RID v3. Previous versions include [RID v1](https://github.com/BlockScience/kms-identity/blob/main/README.md) and [RID v2](https://github.com/BlockScience/rid-lib/blob/v2/README.md).*
+
+### Jump to Sections: 
+ - [RID Core](#rid-core)
+	- [Introduction](#introduction)
+	- [Generic Syntax](#generic-syntax)
+	- [Object Reference Names](#object-reference-names-previously-rid-v2)
+	- [Implementation](#implementation) 
+	- [Installation](#installation)
+	- [Usage](#usage)
+	- [Development](#development)
+ - [RID Extensions](#rid-extensions)
+
+# RID Core
 ## Introduction
 
 *Note: throughout this document the terms "resource", "digital object", and "knowledge object" are used roughly interchangeably.*
@@ -190,3 +203,18 @@ Two new build files should appear in `dist/`, a `.tar.gz` and `.whl` file.
 python -m twine upload --repository pypi dist/*
 ```
 Enter the API key and upload the new package version.
+
+# RID Extensions
+## Introduction
+In addition to the core implementation of the RID specification, this library also provides extended functionality in objects and patterns that interface with RIDs. These features require optional dependencies to properly function, which specified after the package name:
+```
+pip install rid-lib[ext]
+```
+## Manifest
+todo
+## Cache
+todo
+## Event
+todo
+## Effector
+todo
