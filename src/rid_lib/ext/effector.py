@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Callable
 from enum import StrEnum
 from rid_lib import RID
 from .cache import Cache, CacheBundle
@@ -14,6 +14,7 @@ class Effector:
         self._action_table = {}
         
     def __getattr__(self, action_type):
+        # shortcut to execute actions, use action type as function name
         def execute(rid: RID, *args, **kwargs):
             return self.execute(action_type, rid, *args, **kwargs)
         return execute
@@ -23,12 +24,14 @@ class Effector:
         action_type: ActionType, 
         rid_type: Type[RID] | str | tuple[Type[RID] | str]
     ):
-        def decorator(func):
+        def decorator(func: Callable[[RID], CacheBundle | dict | None]):
+            # accept type or list of types to register
             if isinstance(rid_type, (list, tuple)):
                 rid_types = rid_type
             else:
                 rid_types = (rid_type,)
             
+            # retrieve context from RID objects, or use str directly
             for _rid_type in rid_types:
                 if isinstance(_rid_type, type) and issubclass(_rid_type, RID):
                     context = _rid_type.context
@@ -56,7 +59,7 @@ class Effector:
         rid: RID, 
         hit_cache=True, # tries to read cache first, writes to cache if there is a miss
         refresh=False   # refreshes cache even if there was a hit
-    ):
+    ) -> CacheBundle | None:
         if (
             self.cache is not None and 
             hit_cache is True and 
