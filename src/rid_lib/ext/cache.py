@@ -48,6 +48,12 @@ class Cache:
                 data
             )
         )
+        
+    def write_manifest_only(self, rid: RID, manifest: Manifest) -> CacheBundle:
+        return self.write(
+            rid,
+            CacheBundle(manifest)
+        )
     
     def exists(self, rid: RID) -> bool:
         return os.path.exists(
@@ -63,6 +69,9 @@ class Cache:
             return None
         
     def read_all_rids(self) -> list[RID]:
+        if not os.path.exists(self.directory_path):
+            return []
+        
         rids = []
         for filename in os.listdir(self.directory_path):
             encoded_rid_str = filename.split(".")[0]
