@@ -12,6 +12,11 @@
 	- [Usage](#usage)
 	- [Development](#development)
  - [RID Extensions](#rid-extensions)
+	- [Introduction](#introduction-1)
+	- [Manifest](#manifest)
+	- [Event](#manifest)
+	- [Cache](#cache)
+	- [Effector](#effector)
 
 # RID Core
 ## Introduction
