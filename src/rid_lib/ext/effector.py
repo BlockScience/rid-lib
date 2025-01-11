@@ -1,23 +1,33 @@
 from typing import Type, Callable
 from enum import StrEnum
 from rid_lib import RID
+from rid_lib.exceptions import RIDError
 from .cache import Cache, CacheBundle
 from .manifest import Manifest
 
 
+class RIDEffectorError(RIDError):
+    pass
+
+
 class ActionType(StrEnum):
     dereference = "dereference"
+    
+class ProxyHandler:
+    def __init__(self, effector):
+        self.effector = effector
+        
+    def __getattr__(self, action_type):
+        # shortcut to execute actions, use action type as function name
+        def execute(rid: RID, *args, **kwargs):
+            return self.effector.execute(action_type, rid, *args, **kwargs)
+        return execute
 
 class Effector:
     def __init__(self, cache: Cache | None = None):
         self.cache = cache
         self._action_table = {}
-        
-    def __getattr__(self, action_type):
-        # shortcut to execute actions, use action type as function name
-        def execute(rid: RID, *args, **kwargs):
-            return self.execute(action_type, rid, *args, **kwargs)
-        return execute
+        self.run = ProxyHandler(self)
         
     def register(
         self, 
@@ -49,12 +59,12 @@ class Effector:
             func = self._action_table[action_pair]
             return func(rid, *args, **kwargs)
         else:
-            return None
+            raise RIDEffectorError(f"Failed to execute, no action found for action pair '{action_pair}'")
         
     def register_dereference(self, rid_type: Type[RID] | str | tuple[Type[RID] | str]):
         return self.register(ActionType.dereference, rid_type)
         
-    def dereference(
+    def deref(
         self, 
         rid: RID, 
         hit_cache=True, # tries to read cache first, writes to cache if there is a miss

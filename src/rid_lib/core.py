@@ -18,7 +18,7 @@ class MetaRID(ABCMeta):
                 raise RIDTypeError(f"Namespace undefined for ORN based RID type {repr(RIDType)}") 
         
     @property
-    def context(cls):
+    def context(cls) -> str:
         MetaRID.validate_rid_type_definition(cls)
         
         if cls.scheme == ORN_SCHEME:
@@ -41,16 +41,16 @@ class RID(metaclass=MetaRID):
     _ProvisionalContext: Type = None
     
     @property
-    def context(self):
+    def context(self) -> str:
         return self.__class__.context
             
-    def __str__(self):
+    def __str__(self) -> str:
         return self.context + ":" + self.reference
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} RID '{str(self)}'>"
     
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if isinstance(other, self.__class__):
             return str(self) == str(other)
         else:
@@ -127,7 +127,7 @@ class RID(metaclass=MetaRID):
     
     @property
     @abstractmethod
-    def reference(self):
+    def reference(self) -> str:
         pass
 
 
@@ -136,7 +136,7 @@ class ProvisionalContext(RID):
     
     using_prov_ctx = True
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} RID '{str(self)}' (Provisional Context)>"
     
     def __init__(self, reference):
