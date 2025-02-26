@@ -2,7 +2,8 @@ from typing import Type, Callable
 from enum import StrEnum
 from rid_lib import RID
 from rid_lib.exceptions import RIDError
-from .cache import Cache, CacheBundle
+from .bundle import Bundle
+from .cache import Cache
 from .manifest import Manifest
 
 
@@ -34,7 +35,7 @@ class Effector:
         action_type: ActionType, 
         rid_type: Type[RID] | str | tuple[Type[RID] | str]
     ):
-        def decorator(func: Callable[[RID], CacheBundle | dict | None]):
+        def decorator(func: Callable[[RID], Bundle | dict | None]):
             # accept type or list of types to register
             if isinstance(rid_type, (list, tuple)):
                 rid_types = rid_type
@@ -69,7 +70,7 @@ class Effector:
         rid: RID, 
         hit_cache=True, # tries to read cache first, writes to cache if there is a miss
         refresh=False   # refreshes cache even if there was a hit
-    ) -> CacheBundle | None:
+    ) -> Bundle | None:
         if (
             self.cache is not None and 
             hit_cache is True and 
@@ -86,11 +87,11 @@ class Effector:
         
         if raw_data is None: 
             return
-        elif isinstance(raw_data, CacheBundle):
+        elif isinstance(raw_data, Bundle):
             bundle = raw_data
         else:            
             manifest = Manifest.generate(rid, raw_data)
-            bundle = CacheBundle(manifest, raw_data)
+            bundle = Bundle(manifest, raw_data)
         
         if (
             self.cache is not None and 
