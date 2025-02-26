@@ -33,12 +33,3 @@ def json_serialize(obj):
         return {key: json_serialize(value) for key, value in obj.items()}
     else:
         return obj
-
-
-class JSONSerializable:
-    def to_json(self) -> dict:
-        return json_serialize(self)
-    
-    @classmethod
-    def from_json(cls, data: dict):
-        return cls(**data)        

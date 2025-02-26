@@ -1,8 +1,9 @@
-from typing import Any
+from typing import Any, Annotated, TypeAlias
 from pydantic import GetCoreSchemaHandler, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
-from pydantic_core import core_schema, CoreSchema
+from pydantic_core import core_schema, CoreSchema, PydanticCustomError
 from rid_lib.core import RID
+from rid_lib.exceptions import InvalidRIDError
 
 
 class RIDFieldAnnotation:
@@ -14,8 +15,11 @@ class RIDFieldAnnotation:
     ) -> CoreSchema:
         
         def validate_from_str(value: str) -> RID:
-            result = RID.from_string(value)
-            return result
+            # str -> RID validator, reraises RID validation errors for Pydantic handling
+            try:
+                return RID.from_string(value)
+            except InvalidRIDError as err:
+                raise PydanticCustomError(type(err).__name__, str(err))
         
         from_str_schema = core_schema.chain_schema(
             [
@@ -25,13 +29,16 @@ class RIDFieldAnnotation:
         )
         
         return core_schema.json_or_python_schema(
-            json_schema=from_str_schema,
+            # str is valid type for JSON objects
+            json_schema=from_str_schema, 
+            # str or RID are valid types for Python dicts
             python_schema=core_schema.union_schema(
                 [
                     core_schema.is_instance_schema(RID),
                     from_str_schema
                 ]
             ),
+            # RIDs serialized with __str__ function
             serialization=core_schema.plain_serializer_function_ser_schema(
                 lambda instance: str(instance)
             )
@@ -44,3 +51,6 @@ class RIDFieldAnnotation:
         handler: GetJsonSchemaHandler
     ) -> JsonSchemaValue:
         return handler(core_schema.str_schema())
+
+# use this RIDField type alias in place of RID in Pydantic models
+type RIDField = Annotated[RID, RIDFieldAnnotation]

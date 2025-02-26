@@ -1,10 +1,7 @@
 from enum import StrEnum
-from typing import Annotated
-from pydantic.dataclasses import dataclass
-from rid_lib.core import RID
-from .manifest import Manifest
-from .pydantic_adapter import RIDFieldAnnotation
-from .utils import JSONSerializable
+from pydantic import BaseModel
+from .bundle import Bundle
+from .pydantic_adapter import RIDField
 
 
 class EventType(StrEnum):
@@ -13,8 +10,7 @@ class EventType(StrEnum):
     FORGET = "FORGET"
 
 
-@dataclass
-class Event(JSONSerializable):
-    rid: Annotated[RID, RIDFieldAnnotation]
+class Event(BaseModel):
+    rid: RIDField
     event_type: EventType
-    manifest: Manifest | None = None
+    bundle: Bundle | None = None
