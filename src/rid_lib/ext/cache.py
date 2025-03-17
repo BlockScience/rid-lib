@@ -14,33 +14,23 @@ class Cache:
         encoded_rid_str = b64_encode(str(rid))
         return f"{self.directory_path}/{encoded_rid_str}.json"
 
-    def write(self, rid: RID, cache_bundle: Bundle) -> Bundle:
+    def write(self, cache_bundle: Bundle) -> Bundle:
         """Writes bundle to cache, returns a Bundle."""
-        if cache_bundle.manifest.rid != rid:
-            raise ValueError("The provided Bundle's Manifest RID must be equivalent to the 'rid' param.")
+        # if cache_bundle.manifest.rid != rid:
+        #     raise ValueError("The provided Bundle's Manifest RID must be equivalent to the 'rid' param.")
 
         if not os.path.exists(self.directory_path):
             os.makedirs(self.directory_path)
             
-        with open(self.file_path_to(rid), "w") as f:
+        with open(self.file_path_to(cache_bundle.manifest.rid), "w") as f:
             f.write(cache_bundle.model_dump_json(indent=2))
 
         return cache_bundle
-    
-    def bundle_and_write(self, rid: RID, data: dict) -> Bundle:
-        return self.write(
-            rid,
-            Bundle(
-                manifest=Manifest.generate(rid, data),
-                contents=data
-            )
-        )
         
-    def write_manifest_only(self, rid: RID, manifest: Manifest) -> Bundle:
-        return self.write(
-            rid,
-            Bundle(manifest=manifest)
-        )
+    # def write_manifest_only(self, manifest: Manifest) -> Bundle:
+    #     return self.write(
+    #         Bundle(manifest=manifest)
+    #     )
     
     def exists(self, rid: RID) -> bool:
         return os.path.exists(
