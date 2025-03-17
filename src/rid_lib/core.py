@@ -55,6 +55,9 @@ class RID(metaclass=MetaRID):
             return str(self) == str(other)
         else:
             return False
+    
+    def __hash__(self):
+        return hash(str(self))
         
     def __init_subclass__(cls):
         if 'exclude_from_rid_types' in vars(cls):

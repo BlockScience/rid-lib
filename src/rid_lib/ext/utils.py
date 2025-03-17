@@ -3,10 +3,13 @@ import hashlib
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
+from pydantic import BaseModel
 from rid_lib import RID
 
 
-def sha256_hash_json(data: dict):
+def sha256_hash_json(data: dict | BaseModel):
+    if isinstance(data, BaseModel):
+        data = json.loads(data.model_dump_json())
     json_bytes = json.dumps(data, sort_keys=True).encode()
     hash = hashlib.sha256()
     hash.update(json_bytes)

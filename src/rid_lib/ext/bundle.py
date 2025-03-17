@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from rid_lib.core import RID
 from .manifest import Manifest
 
 
@@ -9,4 +10,15 @@ class Bundle(BaseModel):
     returned by the read function of Cache.
     """
     manifest: Manifest
-    contents: dict | None = None
+    contents: dict
+    
+    @classmethod
+    def generate(cls, rid: RID, contents: dict):
+        return cls(
+            manifest=Manifest.generate(rid, contents),
+            contents=contents
+        )
+    
+    @property
+    def rid(self):
+        return self.manifest.rid
