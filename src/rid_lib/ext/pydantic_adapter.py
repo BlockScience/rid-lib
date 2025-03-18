@@ -55,7 +55,7 @@ class RIDTypeFieldAnnotation:
         _handler: GetCoreSchemaHandler
     ) -> CoreSchema:
         
-        def validate_from_str(value: str) -> RID:
+        def validate_from_str(value: str) -> RIDType:
             # str -> RID validator
             return RIDType.from_string(value)
         
