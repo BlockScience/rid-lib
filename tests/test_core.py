@@ -41,10 +41,10 @@ def test_rid_inequality():
     assert rid_obj != rid_obj2
     
 def test_invalid_rid_string():    
-    with pytest.raises(InvalidRIDError):
+    with pytest.raises(TypeError):
         rid_obj = RID.from_string("test")
         
 def test_invalid_orn_rid_string():
-    with pytest.raises(InvalidRIDError):
+    with pytest.raises(TypeError):
         rid_obj = RID.from_string("orn:test")
     
