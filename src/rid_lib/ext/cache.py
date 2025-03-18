@@ -1,6 +1,6 @@
 import os
 import shutil
-from rid_lib.core import RID
+from rid_lib.core import RID, RIDType
 from .bundle import Bundle
 from .utils import b64_encode, b64_decode
 
@@ -36,7 +36,7 @@ class Cache:
         except FileNotFoundError:
             return None
         
-    def read_all_rids(self) -> list[RID]:
+    def read_all_rids(self, allowed_types: list[RIDType] | None = None) -> list[RID]:
         if not os.path.exists(self.directory_path):
             return []
         
@@ -45,7 +45,9 @@ class Cache:
             encoded_rid_str = filename.split(".")[0]
             rid_str = b64_decode(encoded_rid_str)
             rid = RID.from_string(rid_str)
-            rids.append(rid)
+            
+            if not allowed_types or type(rid) in allowed_types:
+                rids.append(rid)
             
         return rids
                 

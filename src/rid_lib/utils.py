@@ -24,11 +24,9 @@ def parse_rid_string(
     if not isinstance(string, str):
         raise TypeError(f"RID type string '{string}' must be of type 'str'")
     
-    "c1..."
     i = string.find(":")
     
     if i < 0:
-        "c1"
         if not context_only:
             raise TypeError(f"RID string '{string}' should contain a ':'-separated context and reference componeont")
         
@@ -38,29 +36,22 @@ def parse_rid_string(
         if scheme in NAMESPACE_SCHEMES:
             raise TypeError(f"RID type string '{string}' is a namespace scheme but is missing a namespace component")
         
-    else:
-        "c1:c2..."
-        
+    else:        
         scheme = string[:i]
-        
         if scheme in NAMESPACE_SCHEMES:
             j = string.find(":", i+1)
         
             if j < 0:
-                "c1:c2"
                 if context_only:
                     namespace = string[i+1:]
                 else:
                     raise TypeError(f"RID string '{string}' is missing a reference component")
-                    
             else:
-                "c1:c2:c3..."
                 if context_only:
                     raise TypeError(f"RID type string '{string}' should contain a maximum of two ':'-separated components")
                 else:
                     namespace = string[i+1:j]
                     reference = string[j+1:]
-            
         else:
             if context_only:
                 raise TypeError(f"RID type string '{string}' contains a ':'-separated namespace component, but scheme doesn't support namespaces")
