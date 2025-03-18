@@ -1,5 +1,6 @@
 from .consts import NAMESPACE_SCHEMES
 
+
 def make_context_string(scheme: str, namespace: str | None):
     if scheme in NAMESPACE_SCHEMES:
         if namespace is None:

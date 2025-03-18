@@ -1,6 +1,6 @@
 import pytest
 from rid_lib.core import RID, ORN
-from rid_lib.exceptions import InvalidRIDError
+
 
 def test_uri_rid_string():
     rid_string = "https://github.com/BlockScience/rid-lib/"

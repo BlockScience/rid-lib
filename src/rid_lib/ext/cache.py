@@ -1,7 +1,6 @@
 import os
 import shutil
 from rid_lib.core import RID
-from .manifest import Manifest
 from .bundle import Bundle
 from .utils import b64_encode, b64_decode
 
@@ -16,9 +15,6 @@ class Cache:
 
     def write(self, cache_bundle: Bundle) -> Bundle:
         """Writes bundle to cache, returns a Bundle."""
-        # if cache_bundle.manifest.rid != rid:
-        #     raise ValueError("The provided Bundle's Manifest RID must be equivalent to the 'rid' param.")
-
         if not os.path.exists(self.directory_path):
             os.makedirs(self.directory_path)
             
@@ -26,11 +22,6 @@ class Cache:
             f.write(cache_bundle.model_dump_json(indent=2))
 
         return cache_bundle
-        
-    # def write_manifest_only(self, manifest: Manifest) -> Bundle:
-    #     return self.write(
-    #         Bundle(manifest=manifest)
-    #     )
     
     def exists(self, rid: RID) -> bool:
         return os.path.exists(
@@ -53,7 +44,7 @@ class Cache:
         for filename in os.listdir(self.directory_path):
             encoded_rid_str = filename.split(".")[0]
             rid_str = b64_decode(encoded_rid_str)
-            rid = RID.from_string(rid_str, allow_prov_ctx=True)
+            rid = RID.from_string(rid_str)
             rids.append(rid)
             
         return rids
