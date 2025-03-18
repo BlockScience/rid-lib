@@ -17,9 +17,9 @@ def test_manifest_constructors():
         sha256_hash=utils.sha256_hash_json({})
     )
     
-    manifest_json = manifest.to_json()
+    manifest_json = manifest.model_dump()
     
-    assert manifest == Manifest.from_json(manifest_json)
+    assert manifest == Manifest.model_validate(manifest_json)
 
 @pytest.mark.skipif(not RID_EXT_ENABLED, reason="Missing rid-lib ext dependencies")
 def test_manifest_generate():

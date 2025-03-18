@@ -1,14 +1,9 @@
 from typing import Type, Callable
 from enum import StrEnum
 from rid_lib import RID
-from rid_lib.exceptions import RIDError
 from .bundle import Bundle
 from .cache import Cache
 from .manifest import Manifest
-
-
-class RIDEffectorError(RIDError):
-    pass
 
 
 class ActionType(StrEnum):
@@ -60,7 +55,7 @@ class Effector:
             func = self._action_table[action_pair]
             return func(rid, *args, **kwargs)
         else:
-            raise RIDEffectorError(f"Failed to execute, no action found for action pair '{action_pair}'")
+            raise LookupError(f"Failed to execute, no action found for action pair '{action_pair}'")
         
     def register_dereference(self, rid_type: Type[RID] | str | tuple[Type[RID] | str]):
         return self.register(ActionType.dereference, rid_type)
@@ -97,6 +92,6 @@ class Effector:
             self.cache is not None and 
             hit_cache is True
         ):
-            self.cache.write(rid, bundle)
+            self.cache.write(bundle)
         
         return bundle
