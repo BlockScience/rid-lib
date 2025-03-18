@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from typing import Type
 
 from . import utils
 from .consts import (
@@ -15,7 +14,7 @@ class RIDType(ABCMeta):
     namespace: str | None = None
     
     # maps RID type strings to their classes
-    type_table: dict[str, Type["RID"]] = dict() 
+    type_table: dict[str, type["RID"]] = dict() 
     
     def __new__(mcls, name, bases, dct):
         """Runs when RID derived classes are defined."""
@@ -39,7 +38,7 @@ class RIDType(ABCMeta):
                 raise TypeError(f"RID type '{name}' is using namespace scheme but 'namespace' is not of type 'str'")
                 
         # check for abstract method implementation
-        if cls.__abstractmethods__:
+        if getattr(cls, "__abstractmethods__", None):
             raise TypeError(f"RID type '{name}' is missing implemenation(s) for abstract method(s) {set(cls.__abstractmethods__)}")
         
         # save RID type to lookup table
@@ -47,7 +46,7 @@ class RIDType(ABCMeta):
         return cls
     
     @classmethod
-    def _new_default_type(mcls, scheme: str, namespace: str | None) -> Type["RID"]:
+    def _new_default_type(mcls, scheme: str, namespace: str | None) -> type["RID"]:
         """Returns a new RID type deriving from DefaultType."""      
         if namespace:
             name = "".join([s.capitalize() for s in namespace.split(".")])
@@ -63,7 +62,7 @@ class RIDType(ABCMeta):
         return type(name, bases, dct)
     
     @classmethod
-    def from_components(mcls, scheme: str, namespace: str | None = None) -> Type["RID"]:
+    def from_components(mcls, scheme: str, namespace: str | None = None) -> type["RID"]:
         context = utils.make_context_string(scheme, namespace)
         
         if context in mcls.type_table:
@@ -72,7 +71,7 @@ class RIDType(ABCMeta):
             return mcls._new_default_type(scheme, namespace)
     
     @classmethod
-    def from_string(mcls, string: str) -> Type["RID"]:
+    def from_string(mcls, string: str) -> type["RID"]:
         """Returns an RID type class from an RID context string."""
         
         scheme, namespace, _ = utils.parse_rid_string(string, context_only=True)
@@ -92,18 +91,14 @@ class RID(metaclass=RIDType):
     namespace: str | None = None
     
     @property
-    def type(self):
-        return self.__class__
-    
-    @property
     def context(self):
-        return str(self.type)
+        return str(type(self))
     
     def __str__(self) -> str:
-        return str(self.type) + ":" + self.reference
+        return self.context + ":" + self.reference
     
     def __repr__(self) -> str:
-        return f"<{self.type.__name__} RID '{str(self)}'>"
+        return f"<{type(self).__name__} RID '{str(self)}'>"
     
     def __eq__(self, other) -> bool:
         if isinstance(other, self.__class__):

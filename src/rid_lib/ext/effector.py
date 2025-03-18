@@ -1,4 +1,4 @@
-from typing import Type, Callable
+from typing import Callable
 from enum import StrEnum
 from rid_lib import RID
 from .bundle import Bundle
@@ -28,7 +28,7 @@ class Effector:
     def register(
         self, 
         action_type: ActionType, 
-        rid_type: Type[RID] | str | tuple[Type[RID] | str]
+        rid_type: type[RID] | str | tuple[type[RID] | str]
     ):
         def decorator(func: Callable[[RID], Bundle | dict | None]):
             # accept type or list of types to register
@@ -57,7 +57,7 @@ class Effector:
         else:
             raise LookupError(f"Failed to execute, no action found for action pair '{action_pair}'")
         
-    def register_dereference(self, rid_type: Type[RID] | str | tuple[Type[RID] | str]):
+    def register_dereference(self, rid_type: type[RID] | str | tuple[type[RID] | str]):
         return self.register(ActionType.dereference, rid_type)
         
     def deref(
