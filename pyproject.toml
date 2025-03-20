@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rid-lib"
-version = "3.1.2"
+version = "3.2.0"
 description = "Implementation of Reference Identifiers (RIDs) protocol in Python"
 authors = [
     {name = "Luke Miller", email = "luke@block.science"}
@@ -21,7 +21,7 @@ dev = ["pytest>=8.0", "pytest-cov>=6.0", "twine>=6.0"]
 Homepage = "https://github.com/BlockScience/rid-lib/"
 
 [tool.pytest.ini_options]
-minversion = 6.0
+minversion = "6.0"
 testpaths = [
     "tests"
 ]

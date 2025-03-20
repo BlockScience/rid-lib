@@ -79,6 +79,9 @@ class RIDType(ABCMeta):
      
     def __str__(cls) -> str:
         return utils.make_context_string(cls.scheme, cls.namespace)
+    
+    def __repr__(cls) -> str:
+        return f"<{cls.__name__} RID type '{str(cls)}'>"
         
     # backwards compatibility
     @property
