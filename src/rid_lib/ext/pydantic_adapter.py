@@ -1,4 +1,4 @@
-from typing import Any, Annotated
+from typing import Any, Annotated, Iterable
 from pydantic import GetCoreSchemaHandler, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import core_schema, CoreSchema
@@ -6,16 +6,30 @@ from rid_lib.core import RID, RIDType
 
 
 class RIDFieldAnnotation:
-    @classmethod
+    expected_types: tuple
+    
+    def __init__(self, expected_types: Iterable[RIDType | str] | None = None):
+        if expected_types is None:
+            self.expected_types = tuple()
+
+        else:
+            self.expected_types = tuple(
+                RIDType.from_string(t) if isinstance(t, str) else t 
+                for t in expected_types
+            )
+    
     def __get_pydantic_core_schema__(
-        cls,
+        self,
         _source_type: Any,
         _handler: GetCoreSchemaHandler
     ) -> CoreSchema:
         
         def validate_from_str(value: str) -> RID:
             # str -> RID validator
-            return RID.from_string(value)
+            rid = RID.from_string(value)
+            if self.expected_types and type(rid) not in self.expected_types:
+                raise ValueError(f"Expected RID of type one of {self.expected_types}, got {repr(type(rid))}")
+            return rid
         
         from_str_schema = core_schema.chain_schema(
             [
@@ -38,9 +52,8 @@ class RIDFieldAnnotation:
             serialization=core_schema.plain_serializer_function_ser_schema(str)
         )
     
-    @classmethod
     def __get_pydantic_json_schema__(
-        cls, 
+        self, 
         _core_schema: CoreSchema, 
         handler: GetJsonSchemaHandler
     ) -> JsonSchemaValue:
@@ -88,6 +101,11 @@ class RIDTypeFieldAnnotation:
     ) -> JsonSchemaValue:
         return handler(core_schema.str_schema())
 
-# use this RIDField type alias in place of RID in Pydantic models
-type RIDField = Annotated[RID, RIDFieldAnnotation]
+# use these type aliases in place of RID and RIDType in Pydantic models
+
+# usage: `Annotated[RID, allowed_types(SlackMessage, ...)]`
+def allowed_types(*args) -> RIDFieldAnnotation:
+    return RIDFieldAnnotation(args)
+
+type RIDField = Annotated[RID, RIDFieldAnnotation()]
 type RIDTypeField = Annotated[RIDType, RIDTypeFieldAnnotation]

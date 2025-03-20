@@ -1,2 +1,2 @@
-from .core import RID
+from .core import RID, RIDType
 from . import types, ext
