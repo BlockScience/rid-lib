@@ -1,6 +1,8 @@
+import json
 from multiprocessing import Value
 from typing import Any
 from abc import ABCMeta, abstractmethod
+from networkx import core_number
 from pydantic_core import core_schema, CoreSchema
 from pydantic import GetCoreSchemaHandler, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
@@ -133,6 +135,14 @@ class RIDType(ABCMeta):
             serialization=core_schema.plain_serializer_function_ser_schema(str)
         )
         
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, _core_schema: CoreSchema, handler: GetJsonSchemaHandler
+    ) -> JsonSchemaValue:
+        json_schema = handler(core_schema.str_schema())
+        json_schema.update({"format": "rid-type"})
+        return json_schema
+        
     # backwards compatibility
     @property
     def context(cls) -> str:
@@ -185,11 +195,11 @@ class RID(metaclass=RIDType):
     
     @classmethod
     def __get_pydantic_json_schema__(
-        cls, 
-        _core_schema: CoreSchema, 
-        handler: GetJsonSchemaHandler
+        cls, _core_schema: CoreSchema, handler: GetJsonSchemaHandler
     ) -> JsonSchemaValue:
-        return handler(core_schema.str_schema())
+        json_schema = handler(core_schema.str_schema())
+        json_schema.update({"format": "rid"})
+        return json_schema
     
     @classmethod
     def from_string(cls, string: str) -> "RID":
