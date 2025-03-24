@@ -38,3 +38,5 @@ class SlackMessage(ORN):
         components = reference.split("/")
         if len(components) == 3:
             return cls(*components)
+        else:
+            raise ValueError("Slack Message reference must contain three '/'-separated components: '<team_id>/<channel_id>/<ts>'")

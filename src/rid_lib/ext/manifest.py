@@ -2,12 +2,11 @@ from datetime import datetime, timezone
 from pydantic import BaseModel
 from rid_lib.core import RID
 from .utils import sha256_hash_json
-from .pydantic_adapter import RIDField
 
 
 class Manifest(BaseModel):
     # created on demand
-    rid: RIDField       # implicit
+    rid: RID       # implicit
     timestamp: datetime # get current time
     sha256_hash: str    # requires access to contents
     

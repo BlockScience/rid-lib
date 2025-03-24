@@ -28,3 +28,5 @@ class SlackChannel(ORN):
         components = reference.split("/")
         if len(components) == 2:
             return cls(*components)
+        else:
+            raise ValueError("Slack Channel reference must contain two '/'-separated components: '<team_id>/<channel_id>'")

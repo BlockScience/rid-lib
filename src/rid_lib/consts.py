@@ -1,4 +1,4 @@
 ORN_SCHEME = "orn"
 URN_SCHEME = "urn"
 NAMESPACE_SCHEMES = (ORN_SCHEME, URN_SCHEME)
-BUILT_IN_TYPES = ("RID", "DefaultType", "ORN", "URN")
+ABSTRACT_TYPES = ("RID", "DefaultType", "ORN", "URN")

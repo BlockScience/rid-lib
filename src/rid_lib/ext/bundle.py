@@ -1,7 +1,10 @@
+from typing import TypeVar
 from pydantic import BaseModel
 from rid_lib.core import RID
 from .manifest import Manifest
 
+
+T = TypeVar("T", bound=BaseModel)
 
 class Bundle(BaseModel):
     """A Knowledge Bundle composed of a manifest and optional contents associated with an RIDed object.
@@ -22,3 +25,6 @@ class Bundle(BaseModel):
     @property
     def rid(self):
         return self.manifest.rid
+    
+    def validate_contents(self, model: type[T]) -> T:
+        return model.model_validate(self.contents)
