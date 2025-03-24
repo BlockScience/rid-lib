@@ -35,8 +35,8 @@ class Cache:
                 return Bundle.model_validate_json(f.read())
         except FileNotFoundError:
             return None
-        
-    def read_all_rids(self, allowed_types: list[RIDType] | None = None) -> list[RID]:
+    
+    def list_rids(self, allowed_types):
         if not os.path.exists(self.directory_path):
             return []
         
@@ -50,6 +50,9 @@ class Cache:
                 rids.append(rid)
             
         return rids
+    
+    def read_all_rids(self, allowed_types: list[RIDType] | None = None) -> list[RID]:
+        return self.list_rids(allowed_types)
                 
     def delete(self, rid: RID) -> None:
         """Deletes cache bundle."""

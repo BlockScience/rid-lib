@@ -3,7 +3,6 @@ from pydantic import BaseModel
 from rid_lib import RID
 from rid_lib.ext.manifest import Manifest
 from .bundle import Bundle
-from .pydantic_adapter import RIDField
 
 
 class EventType(StrEnum):
@@ -13,7 +12,7 @@ class EventType(StrEnum):
 
 
 class Event(BaseModel):
-    rid: RIDField
+    rid: RID
     event_type: EventType
     manifest: Manifest | None = None
     contents: dict | None = None

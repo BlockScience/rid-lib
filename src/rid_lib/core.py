@@ -1,8 +1,15 @@
+from multiprocessing import Value
+from typing import Any
 from abc import ABCMeta, abstractmethod
+from pydantic_core import core_schema, CoreSchema
+from pydantic import GetCoreSchemaHandler, GetJsonSchemaHandler
+from pydantic.json_schema import JsonSchemaValue
+
+
 
 from . import utils
 from .consts import (
-    BUILT_IN_TYPES, 
+    ABSTRACT_TYPES, 
     NAMESPACE_SCHEMES, 
     ORN_SCHEME, 
     URN_SCHEME
@@ -22,7 +29,7 @@ class RIDType(ABCMeta):
         cls = super().__new__(mcls, name, bases, dct)
         
         # ignores built in RID types which aren't directly instantiated
-        if name in BUILT_IN_TYPES:
+        if name in ABSTRACT_TYPES:
             return cls
             
         if not getattr(cls, "scheme", None):
@@ -54,6 +61,13 @@ class RIDType(ABCMeta):
             name = scheme.capitalize()
         
         bases = (DefaultType,)
+        
+        if scheme in NAMESPACE_SCHEMES:
+            if scheme == ORN_SCHEME:
+                bases += (ORN,)
+            elif scheme == URN_SCHEME:
+                bases += (URN,)
+        
         dct = dict(
             scheme=scheme, 
             namespace=namespace
@@ -78,10 +92,46 @@ class RIDType(ABCMeta):
         return mcls.from_components(scheme, namespace)
      
     def __str__(cls) -> str:
+        if cls.__name__ in ABSTRACT_TYPES: 
+            return repr(cls)
         return utils.make_context_string(cls.scheme, cls.namespace)
     
     def __repr__(cls) -> str:
+        if cls.__name__ in ABSTRACT_TYPES: 
+            return type.__repr__(cls)
         return f"<{cls.__name__} RID type '{str(cls)}'>"
+    
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source: type[Any], handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+                
+        def not_abstract_type(rid_type: RIDType) -> RIDType:
+            if rid_type.__name__ in ABSTRACT_TYPES:
+                raise ValueError(f"RIDType must not be abstract type: {ABSTRACT_TYPES}")
+            return rid_type
+        
+        # must be instance of RIDType not in ABSTRACT_TYPES
+        from_instance_schema = core_schema.chain_schema([
+            core_schema.is_instance_schema(RIDType),
+            core_schema.no_info_plain_validator_function(not_abstract_type)
+        ])
+        
+        # must be valid string, validated by RIDType.from_string (and prev schema)
+        from_str_schema = core_schema.chain_schema([
+            core_schema.str_schema(),
+            core_schema.no_info_plain_validator_function(RIDType.from_string),
+            from_instance_schema
+        ])
+        
+        return core_schema.json_or_python_schema(
+            json_schema=from_str_schema,
+            python_schema=core_schema.union_schema([
+                from_instance_schema,
+                from_str_schema
+            ]),
+            serialization=core_schema.plain_serializer_function_ser_schema(str)
+        )
         
     # backwards compatibility
     @property
@@ -111,6 +161,35 @@ class RID(metaclass=RIDType):
     
     def __hash__(self):
         return hash(str(self))
+    
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source: type[Any], handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+        
+        # must be valid string, validated by RID.from_string, and an instance of the correct RID type
+        from_str_schema = core_schema.chain_schema([
+            core_schema.str_schema(),
+            core_schema.no_info_plain_validator_function(RID.from_string),
+            core_schema.is_instance_schema(cls)
+        ])
+        
+        return core_schema.json_or_python_schema(
+            json_schema=from_str_schema,
+            python_schema=core_schema.union_schema([
+                core_schema.is_instance_schema(cls),
+                from_str_schema
+            ]),
+            serialization=core_schema.plain_serializer_function_ser_schema(str)
+        )
+    
+    @classmethod
+    def __get_pydantic_json_schema__(
+        cls, 
+        _core_schema: CoreSchema, 
+        handler: GetJsonSchemaHandler
+    ) -> JsonSchemaValue:
+        return handler(core_schema.str_schema())
     
     @classmethod
     def from_string(cls, string: str) -> "RID":
