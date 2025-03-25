@@ -1,6 +1,7 @@
 from rid_lib.core import RID
 from rid_lib.types import SlackWorkspace, SlackChannel, SlackMessage, SlackUser
 
+
 def test_slack_workspace():
     workspace1 = RID.from_string("orn:slack.workspace:TA2E6KPK3")
     workspace2 = SlackWorkspace.from_reference("TA2E6KPK3")

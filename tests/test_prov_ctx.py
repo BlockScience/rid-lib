@@ -1,4 +1,3 @@
-import pytest
 from rid_lib.core import RID
 
         
