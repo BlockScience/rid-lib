@@ -36,7 +36,7 @@ class Cache:
         except FileNotFoundError:
             return None
     
-    def list_rids(self, allowed_types):
+    def list_rids(self, rid_types: list[RIDType] | None = None) -> list[RID]:
         if not os.path.exists(self.directory_path):
             return []
         
@@ -46,13 +46,10 @@ class Cache:
             rid_str = b64_decode(encoded_rid_str)
             rid = RID.from_string(rid_str)
             
-            if not allowed_types or type(rid) in allowed_types:
+            if not rid_types or type(rid) in rid_types:
                 rids.append(rid)
             
         return rids
-    
-    def read_all_rids(self, allowed_types: list[RIDType] | None = None) -> list[RID]:
-        return self.list_rids(allowed_types)
                 
     def delete(self, rid: RID) -> None:
         """Deletes cache bundle."""
