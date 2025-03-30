@@ -1,13 +1,8 @@
 from datetime import datetime, timezone
-import pytest
 from rid_lib.core import RID
-
-from rid_lib.ext import RID_EXT_ENABLED
-if RID_EXT_ENABLED:
-    from rid_lib.ext import Manifest, utils
+from rid_lib.ext import Manifest, utils
 
 
-@pytest.mark.skipif(not RID_EXT_ENABLED, reason="Missing rid-lib ext dependencies")
 def test_manifest_constructors():
     rid = RID.from_string("test:rid")
     
@@ -17,11 +12,10 @@ def test_manifest_constructors():
         sha256_hash=utils.sha256_hash_json({})
     )
     
-    manifest_json = manifest.to_json()
+    manifest_json = manifest.model_dump()
     
-    assert manifest == Manifest.from_json(manifest_json)
+    assert manifest == Manifest.model_validate(manifest_json)
 
-@pytest.mark.skipif(not RID_EXT_ENABLED, reason="Missing rid-lib ext dependencies")
 def test_manifest_generate():
     rid = RID.from_string("test:rid")
     data = {
