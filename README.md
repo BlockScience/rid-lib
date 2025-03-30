@@ -2,6 +2,8 @@
 
 *This specification can be understood as the third iteration of the RID protocol, or RID v3. Previous versions include [RID v1](https://github.com/BlockScience/kms-identity/blob/main/README.md) and [RID v2](https://github.com/BlockScience/rid-lib/blob/v2/README.md).*
 
+*Warning - documentation out of date, TODO: update for v3.2.0*
+
 ### Jump to Sections: 
  - [RID Core](#rid-core)
 	- [Introduction](#introduction)
