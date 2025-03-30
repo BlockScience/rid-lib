@@ -5,25 +5,9 @@ from .utils import sha256_hash_json
 
 
 class Manifest(BaseModel):
-    # created on demand
-    rid: RID       # implicit
-    timestamp: datetime # get current time
-    sha256_hash: str    # requires access to contents
-    
-    # optional?
-    # version: str = "1.0.0"
-    # source_node: RIDField   # must exist within a node
-    # cacheable: bool
-    # schema: ...
-    # event_source: ...
-    # provenance: list[RIDField]
-    # common_fields: dict[str, str] = {
-    #     "text": "text"
-    # }
-    # internal_rids: list[RIDField] = [
-    #     "orn:slack.user"
-    # ]
-    
+    rid: RID
+    timestamp: datetime
+    sha256_hash: str
     
     @classmethod
     def generate(cls, rid: RID, data: dict):
