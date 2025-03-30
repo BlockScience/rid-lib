@@ -1,13 +1,9 @@
-from typing import Type, Callable
+from typing import Callable
 from enum import StrEnum
 from rid_lib import RID
-from rid_lib.exceptions import RIDError
-from .cache import Cache, CacheBundle
+from .bundle import Bundle
+from .cache import Cache
 from .manifest import Manifest
-
-
-class RIDEffectorError(RIDError):
-    pass
 
 
 class ActionType(StrEnum):
@@ -32,9 +28,9 @@ class Effector:
     def register(
         self, 
         action_type: ActionType, 
-        rid_type: Type[RID] | str | tuple[Type[RID] | str]
+        rid_type: type[RID] | str | tuple[type[RID] | str]
     ):
-        def decorator(func: Callable[[RID], CacheBundle | dict | None]):
+        def decorator(func: Callable[[RID], Bundle | dict | None]):
             # accept type or list of types to register
             if isinstance(rid_type, (list, tuple)):
                 rid_types = rid_type
@@ -59,9 +55,9 @@ class Effector:
             func = self._action_table[action_pair]
             return func(rid, *args, **kwargs)
         else:
-            raise RIDEffectorError(f"Failed to execute, no action found for action pair '{action_pair}'")
+            raise LookupError(f"Failed to execute, no action found for action pair '{action_pair}'")
         
-    def register_dereference(self, rid_type: Type[RID] | str | tuple[Type[RID] | str]):
+    def register_dereference(self, rid_type: type[RID] | str | tuple[type[RID] | str]):
         return self.register(ActionType.dereference, rid_type)
         
     def deref(
@@ -69,7 +65,7 @@ class Effector:
         rid: RID, 
         hit_cache=True, # tries to read cache first, writes to cache if there is a miss
         refresh=False   # refreshes cache even if there was a hit
-    ) -> CacheBundle | None:
+    ) -> Bundle | None:
         if (
             self.cache is not None and 
             hit_cache is True and 
@@ -86,16 +82,16 @@ class Effector:
         
         if raw_data is None: 
             return
-        elif isinstance(raw_data, CacheBundle):
+        elif isinstance(raw_data, Bundle):
             bundle = raw_data
         else:            
             manifest = Manifest.generate(rid, raw_data)
-            bundle = CacheBundle(manifest, raw_data)
+            bundle = Bundle(manifest, raw_data)
         
         if (
             self.cache is not None and 
             hit_cache is True
         ):
-            self.cache.write(rid, bundle)
+            self.cache.write(bundle)
         
         return bundle
