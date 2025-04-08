@@ -216,7 +216,7 @@ python -m build
 ```
 Two new build files should appear in `dist/`, a `.tar.gz` and `.whl` file.
 ```
-python -m twine upload --repository pypi dist/*
+python -m twine upload -r pypi dist/*
 ```
 Enter the API key and upload the new package version.
 

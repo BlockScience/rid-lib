@@ -18,7 +18,11 @@ class Cache:
         if not os.path.exists(self.directory_path):
             os.makedirs(self.directory_path)
             
-        with open(self.file_path_to(cache_bundle.manifest.rid), "w") as f:
+        with open(
+            file=self.file_path_to(cache_bundle.manifest.rid), 
+            mode="w", 
+            encoding="utf-8"
+        ) as f:
             f.write(cache_bundle.model_dump_json(indent=2))
 
         return cache_bundle
