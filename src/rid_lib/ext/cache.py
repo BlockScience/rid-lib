@@ -35,7 +35,11 @@ class Cache:
     def read(self, rid: RID) -> Bundle | None:
         """Reads and returns CacheEntry from RID cache."""
         try:
-            with open(self.file_path_to(rid), "r") as f:
+            with open(
+                file=self.file_path_to(rid), 
+                mode="r",
+                encoding="utf-8"
+            ) as f:
                 return Bundle.model_validate_json(f.read())
         except FileNotFoundError:
             return None
