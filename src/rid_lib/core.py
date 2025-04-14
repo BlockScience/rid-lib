@@ -95,7 +95,7 @@ class RIDType(ABCMeta):
     def __repr__(cls) -> str:
         if cls.__name__ in ABSTRACT_TYPES: 
             return type.__repr__(cls)
-        return f"<{cls.__name__} RID type '{str(cls)}'>"
+        return f"<RIDType '{str(cls)}'>"
     
     @classmethod
     def __get_pydantic_core_schema__(
@@ -155,7 +155,7 @@ class RID(metaclass=RIDType):
         return self.context + ":" + self.reference
     
     def __repr__(self) -> str:
-        return f"<{type(self).__name__} RID '{str(self)}'>"
+        return f"<RID '{str(self)}'>"
     
     def __eq__(self, other) -> bool:
         if isinstance(other, self.__class__):
