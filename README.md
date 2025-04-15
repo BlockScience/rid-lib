@@ -2,14 +2,17 @@
 
 *This specification can be understood as the third iteration of the RID protocol, or RID v3. Previous versions include [RID v1](https://github.com/BlockScience/kms-identity/blob/main/README.md) and [RID v2](https://github.com/BlockScience/rid-lib/blob/v2/README.md).*
 
-*Warning - documentation out of date, TODO: update for v3.2.0*
 
 ### Jump to Sections: 
  - [RID Core](#rid-core)
 	- [Introduction](#introduction)
 	- [Generic Syntax](#generic-syntax)
 	- [Object Reference Names](#object-reference-names-previously-rid-v2)
-	- [Implementation](#implementation) 
+	- [Implementation](#implementation)
+		- [RID class](#rid-class)
+		- [RID types](#rid-types)
+		- [Creating your own types](#creating-your-own-types)
+		- [Pydantic compatibility](#pydantic-compatibility)
 	- [Installation](#installation)
 	- [Usage](#usage)
 	- [Development](#development)
@@ -108,32 +111,73 @@ These three different locators have specific use cases, but none of them work we
 
 ## Implementation
 
+### RID class
+
 The RID class provides a template for all RID types and access to a global constructor. All RID instances have access to the following properties:
 ```python
-scheme: str
+class RID:
+	scheme: str
 
-# defined for ORNs only
-namespace: str | None 
+	# defined for ORNs only
+	namespace: str | None 
 
-# "orn:<namespace>" for ORNs, otherwise equal to 'scheme'
-context: str
+	# "orn:<namespace>" for ORNs, otherwise equal to 'scheme'
+	context: str
 
-# the component after namespace component for ORNs, otherwise after the scheme component
-reference: str
+	# the component after namespace component for ORNs, otherwise after the scheme component
+	reference: str
+
+	@classmethod
+	def from_string(cls, string: str) -> RID: ... 
+
+	# only callable from RID type classes, not the RID base class
+	@classmethod
+	def from_reference(cls, string: str) -> RID: ...
 ```
-and the following methods:
+
+
+
+Example implementations can be found in [`src/rid_lib/types/`](https://github.com/BlockScience/rid-lib/tree/main/src/rid_lib/types).
+
+### RID types
+This library treats both RIDs and RID types as first class objects. Behind the scenes, the `RIDType` base class is the metaclass for all RID type classes (which are created by inheriting from the `RID`, `ORN`, `URN` classes) -- so RID types are the classes, and RIDs are the instances of those classes. You can access the type of an RID using the built-in type function: `type(rid)`. All RIDs with the same context are guaranteed to share the same RID type class. Even if that RID type doesn't have any explicit class implementation, a class will be automatically generated for it.
+
 ```python
-@classmethod
-def from_string(cls, string: str, allow_prov_ctx=True) -> RID: ... 
+class RIDType(ABCMeta):
+    scheme: str | None = None
+    namespace: str | None = None
+    
+    # maps RID type strings to their classes
+    type_table: dict[str, type["RID"]] = dict() 
+    
+    @classmethod
+    def from_components(mcls, scheme: str, namespace: str | None = None) -> type["RID"]: ...
 
-# only callable from RID type classes, not the RID base class
-@classmethod
-def from_reference(cls, string: str) -> RID: ...
+    @classmethod
+    def from_string(mcls, string: str) -> type["RID"]: ...
+        
+    # backwards compatibility
+    @property
+    def context(cls) -> str:
+        return str(cls)
 ```
+
+The correct way to check the type of an RID is to check it's Python type. RID types can also be created using `RIDType.from_string`, which is also guaranteed to return the same class if the context component is the same.
+```python
+from rid_lib import RID, RIDType
+from rid_lib.types import SlackMessage
+
+slack_msg_rid = RID.from_string("orn:slack.message:TA2E6KPK3/C07BKQX0EVC/1721669683.087619")
+
+assert type(slack_msg_rid) == SlackMessage
+assert SlackMessage == RIDType.from_string("orn:slack.message")
+```
+
+### Creating your own types
 
 In order to create an RID type, follow this minimal implementation:
 ```python
-class TypeName(RID | ORN): # inherit from RID OR ORN base classe
+class MyRIDType(RID): # inherit from `RID` OR `ORN` base classes
 	# define scheme for a generic URI type
 	scheme = "scheme"
 	# OR a namespace for a ORN type
@@ -153,10 +197,23 @@ class TypeName(RID | ORN): # inherit from RID OR ORN base classe
 	@classmethod
 	def from_reference(cls, reference):
 		# in a typical use case, the reference would need to be parsed
+
+		# raise a ValueError if the reference is invalid
+		if len(reference) > 10:
+			raise ValueError("Internal ID must be less than 10 characters!")
+		
 		return cls(reference)
 ```
 
-[Example implementations can be found here.](https://github.com/BlockScience/rid-lib/tree/v3/src/rid_lib/types)
+### Pydantic Compatibility
+Both RIDs and RID types are Pydantic compatible fields, which means they can be used directly within a Pydantic model in very flexible ways:
+
+```python
+class Model(BaseModel):
+	rid: RID
+	slack_rid: SlackMessage | SlackUser | SlackChannel | SlackWorkspace
+	rid_types: list[RIDType]
+```
 
 ## Installation
 
@@ -172,7 +229,7 @@ pip install .
 
 ## Usage
 
-RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems. RID objects can be constructed from any RID string using the general constructor `RID.from_string`. The parser will match the string's context component and call the corresponding `from_reference` constructor. This can also be done directly on any context class via `Context.from_reference`. Finally, each context class provides a default constructor which requires each subcomponent to be indvidiually specified.
+RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems. RID objects can be constructed from any RID string using the general constructor `RID.from_string`. The parser will match the string's context component and call the corresponding `from_reference` constructor. This can also be done directly on any RID type class via `MyRIDType.from_reference`. Finally, each context class provides a default constructor which requires each subcomponent to be indvidiually specified.
 ```python
 from rid_lib import RID
 from rid_lib.types import SlackMessage
@@ -190,7 +247,7 @@ print(rid_obj1.scheme, rid_obj1.context, rid_obj1.reference)
 print(rid_obj1.team_id, rid_obj1.channel_id, rid_obj1.ts)
 ```
 
-If an RID type hasn't been implemented as a context class, it can still be parsed by the general constructor if provisional contexts are allowed (enabled by default). In this case a provisional context class is generated on the fly providing the minimal RID type implementation (`reference` property, `from_reference` class method, `__init__` function).
+If an RID type hasn't been implemented as a class, it can still be parsed by the general constructor if provisional contexts are allowed (enabled by default). In this case a provisional context class is generated on the fly providing the minimal RID type implementation (`reference` property, `from_reference` class method, `__init__` function).
 
 ```python
 test_obj1 = RID.from_string("test:one")
@@ -222,130 +279,62 @@ Enter the API key and upload the new package version.
 
 # RID Extensions
 ## Introduction
-In addition to the core implementation of the RID specification, this library also provides the extended functionality of objects and patterns that interface with RIDs. These features require optional dependencies to properly function, which is specified after the package name:
-```
-pip install rid-lib[ext]
-```
+In addition to the core implementation of the RID specification, this library also provides extended functionality through objects and patterns that interface with RIDs.
 
 ## Manifest
-A manifest is a portable descriptor of a data object associated with an RID. It is composed of an RID and metadata about the data object it describes(currently a timestamp and sha256 hash). The name "manifest" comes from a shipping metaphor: a piece of cargo has contents (the stuff inside of it) and a manifest (a paper describing the contents and providing tracking info). In the KOI network ecosystem, a manifest serves a similar role. Manifests can be passed around to inform other nodes of a data objects they may be interested in.
+A manifest is a portable descriptor of a data object associated with an RID. It is composed of an RID and metadata about the data object it describes (currently a timestamp and sha256 hash). The name "manifest" comes from a shipping metaphor: a piece of cargo has contents (the stuff inside of it) and a manifest (a paper describing the contents and providing tracking info). In the KOI network ecosystem, a manifest serves a similar role. Manifests can be passed around to inform other nodes of a data objects they may be interested in.
 
 Below are the accessible fields and methods of a Manifest object, all are required.
 
 ```python
-class Manifest:
+class Manifest(BaseModel):
 	rid: RID
 	timestamp: datetime
 	sha256_hash: str
 
-	# creates a new Manifest with the provided fields
-	def __init__(
-		self, 
-		rid: RID, 
-		timestamp: datetime, 
-		sha256_hash: str
-	): ...
-
 	# generates a Manifest using the current datetime and the hash of the provided data
 	@classmethod
 	def generate(cls, rid: RID, data: dict) -> Manifest: ...
-
-	# JSON serialization functions
-	@classmethod
-	def from_json(cls, data: dict) -> Manifest: ...
-	def to_json(self) -> dict: ...
 ```
-## Event
-An event is a signalling construct that conveys information about RID objects between networked nodes. In this version of the network, this signalling path will be `sensor -> coordinator -> processor`. Events are generated by sensors upon discovering a new knowledge object, an update to an existing knowledge object, or a knowledge object was deleted or should be forgotten by the network. These scenarios correspond to the three (FUN) event types:
 
-- FORGET
-- UPDATE
-- NEW
-
-As opposed to CRUD (create, read, update, delete), FUN is a series of messages, not operations. Each node has its own autonomy in deciding how to react based on the message it receives. For example, a processor node may receive a "new" event for an RID object its not interested in, and ignore it. Or it may decide that an "update" event should trigger a dereference call to a sensor to retrieve an updated version of an RID's data.
-
-An event object is composed of an RID, an event type, and an optional manifest. Below are the accessible fields and methods of an Event object. 
+## Bundle
+A bundle is composed of a manifest and contents. This is the "piece of cargo" in the shipping metaphor described above. It's the construct used to transfer and store the RIDed knowledge objects we are interested in.
 
 ```python
-class Event:
-    rid: RID
-	# one of the FUN types
-    event_type: str 
-    manifest: Manifest | None
-	
-	# creates a new Event with the provided fields
-	def __init__(
-		self, 
-		rid: RID, 
-		event_type: str, 
-		manifest: Manifest | None = None
-	): ...
+class Bundle(BaseModel):
+    manifest: Manifest
+    contents: dict
 
-	# JSON serialization functions
 	@classmethod
-	def from_json(cls, data: dict) -> Event: ...
-	def to_json(self) -> dict: ...
+    def generate(cls, rid: RID, contents: dict) -> Bundle: ...
 ```
+
+*Manifests and bundles are implemented as Pydantic models, meaning they can be initialized with args or kwargs. They can also be serialized with `model_dump()` and `model_dump_json()`, and deserialized with `model_validate()` and `model_validate_json()`.*
 
 ## Cache
-The cache module provides two functions: a basic cache interface for storing data objects associated with RIDs, and a portable 'cache bundle' data format for storing and transferring these objects.
-
-A cache bundle is composed of a manifest and (optional) contents. This is the "piece of cargo" in the shipping metaphor described above. It's the construct used to transfer and store the RIDed knowledge objects we are interested in. The contents are optional to allow just the manifests to be cached by themselves. Below are the accessible fields and methods of an Event object.
-
-```python
-class CacheBundle:
-    manifest: Manifest
-    contents: dict | None
-
-	# create a new CacheBundle with the provided fields
-	def __init__(
-		self, 
-		manifest: Manifest, 
-		contents: dict | None = None
-	): ...
-
-	# JSON serialization functions
-	@classmethod
-	def from_json(cls, data: dict) -> CacheBundle: ...
-	def to_json(self) -> dict: ...
-```
-
-The cache interface allows us to set up a cache for reading and writing these cache bundles. Each cache bundle is stored as a separate JSON file in the cache directory, where the file name is base 64 encoding of its RID. Below are the accessible fields and methods of a Cache.
+The cache class allows us to set up a cache for reading and writing bundles to the local filesystem. Each bundle is stored as a separate JSON file in the cache directory, where the file name is base 64 encoding of its RID. Below are the accessible fields and methods of a Cache.
 
 ```python
 class Cache:
-	directory_path: str
-
-	# sets up a new cache under the provided directory
     def __init__(self, directory_path: str): ...  
 
-	# provides the path to the cache entry of the provided RID
     def file_path_to(self, rid: RID) -> str: ...
 
-	# WRITE METHODS
-	# writes a cache bundle
-    def write(self, rid: RID, cache_bundle: CacheBundle) -> CacheBundle: ...
-	# creates a cache bundle from the provided data (Manifest.generate) and writes it
-    def bundle_and_write(self, rid: RID, data: dict) -> CacheBundle: ...
-	# creates a cache bundle from the provided manifest and writes it
-    def write_manifest_only(self, rid: RID, manifest: Manifest) -> CacheBundle: ...
+    def write(self, cache_bundle: Bundle) -> Bundle: ...
 
-	# READ METHODS
-	# returns whether a cache entry exists for the provided RID
     def exists(self, rid: RID) -> bool: ...
-	# returns cache bundle of provided RID (or None if it doesn't exist)
-    def read(self, rid: RID) -> CacheBundle | None: ...
-	# returns a list of all of the RIDs currently cached
-    def read_all_rids(self) -> list[RID]: ...
+    def read(self, rid: RID) -> Bundle | None: ...
+    def list_rids(
+		self, rid_types: list[RIDType] | None = None
+	) -> list[RID]: ...
 
-	# DELETE METHODS
-	# deletes the cache entry of the provided RID
     def delete(self, rid: RID) -> None: ...
-	# wipes the cache completely
     def drop(self) -> None: ...
 ```
 
 ## Effector
+
+*The effector has not been used or updated in awhile, it may be removed or refactored in the future.*
 
 The effector is the most abstract construct out of the rid-lib extensions. It acts as an "end effector", performing actions on/with RIDs. More concretely, it allows you to define and bind functions to a specific action type and RID context. The most obvious use case for this is as a dereferencer (and this use case has added functionality): a dereference function can be defined for different types of RIDs, and the effector will automatically choose the correct one to run based on the context of the RID passed in. Below are the accessible fields and methods of Effector.
 
