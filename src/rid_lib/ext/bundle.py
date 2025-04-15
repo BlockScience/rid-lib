@@ -7,16 +7,16 @@ from .manifest import Manifest
 T = TypeVar("T", bound=BaseModel)
 
 class Bundle(BaseModel):
-    """A Knowledge Bundle composed of a manifest and optional contents associated with an RIDed object.
+    """A knowledge bundle composed of a manifest and contents associated with an RIDed object.
 
-    A container object for the cached data associated with an RID. It is 
-    returned by the read function of Cache.
+    Acts as a container for the data associated with an RID. It is written to and read from the cache.
     """
     manifest: Manifest
     contents: dict
     
     @classmethod
-    def generate(cls, rid: RID, contents: dict):
+    def generate(cls, rid: RID, contents: dict) -> "Bundle":
+        """Generates a bundle from provided RID and contents."""
         return cls(
             manifest=Manifest.generate(rid, contents),
             contents=contents
@@ -24,7 +24,9 @@ class Bundle(BaseModel):
     
     @property
     def rid(self):
+        """This bundle's RID."""
         return self.manifest.rid
     
     def validate_contents(self, model: type[T]) -> T:
+        """Attempts to validate contents against a Pydantic model."""
         return model.model_validate(self.contents)
