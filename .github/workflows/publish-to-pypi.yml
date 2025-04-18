@@ -1,5 +1,9 @@
 name: Publish Python package to PyPI
-on: push
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
 jobs:
   build:
     name: Build distro
