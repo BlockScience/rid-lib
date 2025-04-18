@@ -10,7 +10,8 @@ from rid_lib import RID
 def sha256_hash_json(data: dict | BaseModel):
     if isinstance(data, BaseModel):
         data = json.loads(data.model_dump_json())
-    json_bytes = json.dumps(data, sort_keys=True).encode()
+    json_str = json.dumps(data, separators=(',', ':'), sort_keys=True)
+    json_bytes = json_str.encode()
     hash = hashlib.sha256()
     hash.update(json_bytes)
     return hash.hexdigest()
