@@ -13,19 +13,19 @@ class Cache:
         encoded_rid_str = b64_encode(str(rid))
         return f"{self.directory_path}/{encoded_rid_str}.json"
 
-    def write(self, cache_bundle: Bundle) -> Bundle:
+    def write(self, bundle: Bundle) -> Bundle:
         """Writes bundle to cache, returns a Bundle."""
         if not os.path.exists(self.directory_path):
             os.makedirs(self.directory_path)
             
         with open(
-            file=self.file_path_to(cache_bundle.manifest.rid), 
+            file=self.file_path_to(bundle.manifest.rid), 
             mode="w", 
             encoding="utf-8"
         ) as f:
-            f.write(cache_bundle.model_dump_json(indent=2))
+            f.write(bundle.model_dump_json(indent=2))
 
-        return cache_bundle
+        return bundle
     
     def exists(self, rid: RID) -> bool:
         return os.path.exists(
