@@ -42,7 +42,7 @@ class RIDType(ABCMeta):
                 
         # check for abstract method implementation
         if getattr(cls, "__abstractmethods__", None):
-            raise TypeError(f"RID type '{name}' is missing implemenation(s) for abstract method(s) {set(cls.__abstractmethods__)}")
+            raise TypeError(f"RID type '{name}' is missing implementation(s) for abstract method(s) {set(cls.__abstractmethods__)}")
         
         # save RID type to lookup table
         mcls.type_table[str(cls)] = cls
