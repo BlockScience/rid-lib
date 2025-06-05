@@ -118,13 +118,13 @@ The RID class provides a template for all RID types and access to a global const
 class RID:
 	scheme: str
 
-	# defined for ORNs only
+	# defined for namespaces schemes (ORN, URN, ...) only
 	namespace: str | None 
 
-	# "orn:<namespace>" for ORNs, otherwise equal to 'scheme'
+	# "<scheme>:<namespace>" for namespaces schemes, otherwise equal to scheme component
 	context: str
 
-	# the component after namespace component for ORNs, otherwise after the scheme component
+	# the component after the context component
 	reference: str
 
 	@classmethod
@@ -177,10 +177,10 @@ assert SlackMessage == RIDType.from_string("orn:slack.message")
 
 In order to create an RID type, follow this minimal implementation:
 ```python
-class MyRIDType(RID): # inherit from `RID` OR `ORN` base classes
+class MyRIDType(RID): # inherit from `RID` or namespace scheme (`ORN`, `URN`, ...) base classes
 	# define scheme for a generic URI type
 	scheme = "scheme"
-	# OR a namespace for a ORN type
+	# OR a namespace if using a namespace scheme
 	namespace = "namespace"
 
 	# instantiates a new RID from internal components
@@ -247,13 +247,14 @@ print(rid_obj1.scheme, rid_obj1.context, rid_obj1.reference)
 print(rid_obj1.team_id, rid_obj1.channel_id, rid_obj1.ts)
 ```
 
-If an RID type hasn't been implemented as a class, it can still be parsed by the general constructor if provisional contexts are allowed (enabled by default). In this case a provisional context class is generated on the fly providing the minimal RID type implementation (`reference` property, `from_reference` class method, `__init__` function).
+If an RID type doesn't have a class implementation, it can still be parsed by both the RID and RIDType constructors. A default type implementation will be generated on the fly with a minimal implementation (`reference` property, `from_reference` class method, `__init__` function).
 
 ```python
 test_obj1 = RID.from_string("test:one")
 test_obj2 = RID.from_string("test:one")
 
 assert test_obj1 == test_obj2
+assert type(test_obj1) == RIDType.from_string("test")
 ```
 
 ## Development
