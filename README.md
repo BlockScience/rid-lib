@@ -97,7 +97,7 @@ orn:slack.message:TA2E6KPK3/C07BKQX0EVC/1721669683.087619
 
 By representing Slack messages through ORNs, a stable identifier can be assigned to a resource which can be mapped to existing locators for different use cases. For example, a Slack message can be represented as a shareable link which redirects to the Slack app or in browser app: 
 ```
-https://blockscienceteam.slack.com/archives/C07BKQX0EVC/p1721669683087619`
+https://blockscienceteam.slack.com/archives/C07BKQX0EVC/p1721669683087619
 ```
 There's also a "deep link" which can open the Slack app directly (but only to a channel):
 ```
