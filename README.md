@@ -306,7 +306,7 @@ class Bundle(BaseModel):
     manifest: Manifest
     contents: dict
 
-	@classmethod
+    @classmethod
     def generate(cls, rid: RID, contents: dict) -> Bundle: ...
 ```
 
