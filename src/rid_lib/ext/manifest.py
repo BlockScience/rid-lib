@@ -12,6 +12,10 @@ class Manifest(BaseModel):
     rid: RID
     timestamp: datetime
     sha256_hash: str
+
+    # implied for older versions
+    version: str = "3.0.0"
+    mime_type: str = "application/json"
     
     @classmethod
     def generate(cls, rid: RID, data: dict) -> "Manifest":
