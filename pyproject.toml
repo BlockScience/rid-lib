@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rid-lib"
-version = "3.2.5"
+version = "3.2.6"
 description = "Implementation of Reference Identifiers (RIDs) protocol in Python"
 authors = [
     {name = "Luke Miller", email = "luke@block.science"}
