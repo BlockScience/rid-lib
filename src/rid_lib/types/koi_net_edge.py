@@ -1,7 +1,4 @@
-import json
-import hashlib
 from rid_lib.core import ORN
-from .koi_net_node import KoiNetNode
 
 
 class KoiNetEdge(ORN):
