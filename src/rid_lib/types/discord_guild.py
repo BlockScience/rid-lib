@@ -1,12 +1,10 @@
-from rid_lib.core import RID, ORN
+from rid_lib.core import ORN
+
 
 class DiscordGuild(ORN):
     namespace = "discord.guild"
     
-    def __init__(
-            self,
-            guild_id: str
-        ):
+    def __init__(self, guild_id: str):
         self.guild_id = guild_id
             
     @property
@@ -16,5 +14,3 @@ class DiscordGuild(ORN):
     @classmethod
     def from_reference(cls, reference):
         return cls(reference)
-   
-RID.register_context(DiscordGuild)

@@ -1,12 +1,10 @@
-from rid_lib.core import RID, ORN
+from rid_lib.core import ORN
+
 
 class DiscordUser(ORN):
     namespace = "discord.user"
     
-    def __init__(
-            self,
-            user_id: str
-        ):
+    def __init__(self, user_id: str):
         self.user_id = user_id
             
     @property
@@ -16,5 +14,3 @@ class DiscordUser(ORN):
     @classmethod
     def from_reference(cls, reference):
         return cls(reference)
-       
-RID.register_context(DiscordUser)
