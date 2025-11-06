@@ -1,9 +1,10 @@
-from rid_lib.core import RID, ORN
+from rid_lib.core import ORN
+
 
 class HackMDNote(ORN):
     namespace = "hackmd.note"
     
-    def __init__(self, note_id):
+    def __init__(self, note_id: str):
         self.note_id = note_id
         
     @property
@@ -13,5 +14,3 @@ class HackMDNote(ORN):
     @classmethod
     def from_reference(cls, reference):
         return cls(reference)
-
-RID.register_context(HackMDNote)
