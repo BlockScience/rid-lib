@@ -1,13 +1,10 @@
-from rid_lib.core import RID, ORN
+from rid_lib.core import ORN
+
 
 class DiscordMessage(ORN):
     namespace = "discord.message"
     
-    def __init__(
-            self,
-            channel_id: str,
-            message_id: str
-        ):
+    def __init__(self, channel_id: str, message_id: str):
         self.channel_id = channel_id
         self.message_id = message_id
             
@@ -20,5 +17,3 @@ class DiscordMessage(ORN):
         components = reference.split("/")
         if len(components) == 2:
             return cls(*components)
-                
-RID.register_context(DiscordMessage)
