@@ -1,7 +1,7 @@
 from rid_lib.core import ORN
 from rid_lib.types.gdrive_file import GoogleDriveFile
 
-class FileAuthors(ORN):
+class GoogleDriveFileAuthors(ORN):
     namespace = 'google_drive.file.authors'
 
     def __init__(self, id: str):
