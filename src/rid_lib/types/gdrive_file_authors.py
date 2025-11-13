@@ -1,5 +1,5 @@
-from src.rid_lib.core import ORN
-from src.rid_lib.types.gdrive_file import GoogleDriveFile
+from rid_lib.core import ORN
+from rid_lib.types.gdrive_file import GoogleDriveFile
 
 class FileAuthors(ORN):
     namespace = 'google_drive.file.authors'

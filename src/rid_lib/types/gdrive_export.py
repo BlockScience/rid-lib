@@ -1,4 +1,4 @@
-from src.rid_lib.core import ORN
+from rid_lib.core import ORN
 
 
 class GoogleDriveExport(ORN):

@@ -1,5 +1,5 @@
-from src.rid_lib.core import ORN
-from src.rid_lib.types.gdrive_export import GoogleDriveExport
+from rid_lib.core import ORN
+from rid_lib.types.gdrive_export import GoogleDriveExport
 
 class GoogleDriveFile(ORN):
     namespace = 'google_drive.file'
