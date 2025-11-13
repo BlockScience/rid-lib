@@ -1,5 +1,4 @@
 from src.rid_lib.core import ORN
-from src.rid_lib.types.gdrive_file import GoogleDriveFile
 
 
 class GoogleDriveExport(ORN):
@@ -17,10 +16,6 @@ class GoogleDriveExport(ORN):
     @property
     def reference(self):
         return f'{self.mimeType}/{self.id}'
-    
-    @property
-    def file(self) -> GoogleDriveFile:
-        return super().__init__(self.id)
     
     @classmethod
     def from_reference(cls, reference):

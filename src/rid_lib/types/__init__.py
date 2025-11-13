@@ -11,6 +11,4 @@ from .discord_guild import DiscordGuild
 from .discord_channel import DiscordChannel
 from .discord_message import DiscordMessage
 from .discord_user import DiscordUser
-from .gdrive_file import GoogleDriveFile
-from .gdrive_export import GoogleDriveExport
-from .gdrive_file_authors import GoogleDriveFileAuthors
+from .gdrive_file_authors import FileAuthors
