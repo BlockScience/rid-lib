@@ -7,7 +7,8 @@ name = "rid-lib"
 version = "3.2.11"
 description = "Implementation of Reference Identifiers (RIDs) protocol in Python"
 authors = [
-    {name = "Luke Miller", email = "luke@block.science"}
+    {name = "Luke Miller", email = "luke@block.science"},
+    {name = "Joshua Jodesty", email = "joshua@block.science"}
 ]
 readme = "README.md"
 requires-python = ">=3.10"
