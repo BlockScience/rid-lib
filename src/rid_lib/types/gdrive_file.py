@@ -47,6 +47,6 @@ class GoogleDriveFile(ORN):
             if len(id) >= 1:
                 return cls(id)
             else:
-                raise ValueError("Google Drive File reference must not be an empty string")
+                raise ValueError("Google Drive File reference MUST NOT be an empty string")
         else:
-            raise ValueError("Google Drive File reference must be a string")
+            raise ValueError("Google Drive File reference MUST be a string")
