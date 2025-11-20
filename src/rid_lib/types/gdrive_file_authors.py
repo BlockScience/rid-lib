@@ -23,12 +23,7 @@ class GoogleDriveFileAuthors(ORN):
     def from_reference(cls, fileId: str):
         if type(fileId) is str:
             if len(fileId) >= 1:
-                try:
-                    # Validate email using Pydantic's EmailStr
-                    EmailStr._validate(fileId)
-                    return cls(fileId)
-                except ValidationError:
-                    raise ValueError(f"Google Drive File Authors reference must be a valid email address: {fileId}")
+                return cls(fileId)
             else:
                 raise ValueError("Google Drive File Authors reference must not be an empty string")
         else:
