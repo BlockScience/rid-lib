@@ -1,5 +1,3 @@
-from pydantic import EmailStr, ValidationError
-
 from rid_lib.core import ORN
 from rid_lib.types.gdrive_file import GoogleDriveFile
 

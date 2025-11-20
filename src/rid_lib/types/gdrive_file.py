@@ -20,7 +20,6 @@ export_mimeTypes = {
 class GoogleDriveFile(ORN):
     namespace = 'google_drive.file'
     mimeType = 'application/vnd.google-apps.file'
-    export_mimeTypes = export_mimeTypes
 
     def __init__(self, id: str):
         self.id = id
