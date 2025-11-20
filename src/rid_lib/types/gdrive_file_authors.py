@@ -6,7 +6,6 @@ from rid_lib.types.gdrive_file import GoogleDriveFile
 
 class GoogleDriveFileAuthors(ORN):
     namespace = 'google_drive.file.authors'
-    export_mimeTypes = GoogleDriveFile.export_mimeTypes
 
     def __init__(self, fileId: str):
         self.fileId = fileId
