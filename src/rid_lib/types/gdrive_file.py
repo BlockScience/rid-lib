@@ -2,21 +2,6 @@ from rid_lib.core import ORN
 from rid_lib.types.gdrive_export import GoogleDriveExport
 
 
-document_mimeType = 'application/vnd.google-apps.document'
-sheets_mimeType = 'application/vnd.google-apps.spreadsheet'
-slides_mimeType = 'application/vnd.google-apps.presentation'
-
-export_mimeType_map = {
-    document_mimeType: {'text': {'plain': 'text/plain', 'markdown': 'text/markdown'}},
-    sheets_mimeType: {'text': {'csv': 'text/csv', 'tab-separated-values': 'text/tab-separated-values'}},
-    slides_mimeType: {'text': {'plain': 'text/plain'}}
-}
-export_mimeTypes = {
-    document_mimeType: export_mimeType_map[document_mimeType]['text']['plain'], # 'text/plain'
-    sheets_mimeType: export_mimeType_map[sheets_mimeType]['text']['csv'], # 'text/csv'
-    slides_mimeType: export_mimeType_map[slides_mimeType]['text']['plain'], # 'text/plain'
-}
-
 class GoogleDriveFile(ORN):
     namespace = 'google_drive.file'
     mimeType = 'application/vnd.google-apps.file'
