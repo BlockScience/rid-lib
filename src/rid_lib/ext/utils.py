@@ -1,7 +1,7 @@
 import hashlib
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from pydantic import BaseModel
-from vendor.org.webpki.json.Canonicalize import canonicalize
+from .._vendor.org.webpki.json.Canonicalize import canonicalize
 
 
 def sha256_hash(data: str) -> str:
