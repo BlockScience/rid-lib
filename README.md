@@ -42,10 +42,13 @@ As opposed to Uniform Resource Identifiers (URIs), RIDs are not intended to have
 
 The generic syntax to compose an RID roughly mirrors URIS:
 ```
-<context>:<reference>
+<type>:<reference>
 ```
 
-Conceptually, the reference refers to the referent, while the context provides context for how to interpret the reference, or how to discriminate it from another otherwise identical RID. While in many cases the context simply maps to a URI scheme, the context may also include part of the "hierarchical part" (right hand side of a URI following the scheme).
+Conceptually, the reference refers to the referent, while the type provides context for how to interpret the reference, or how to discriminate it from another otherwise identical RID. While in many cases the type simply maps to a URI scheme, the type may also include part of the "hierarchical part" (right hand side of a URI following the scheme).
+
+*See [rid-registry](https://github.com/BlockScience/rid-registry) for a list of active RID types.*
+
 ## Object Reference Names (previously RID v2)
 
 The major change from RID v2 to v3 was building compatibility with URIs, and as a result the previous RID v2 style identifiers are now implemented under the (unofficial) `orn:` URI scheme. 
@@ -58,12 +61,12 @@ orn:<namespace>:<reference>
 ```
 *Note: In previous versions, the namespace was split into `<space>.<form>`. Using a dot to separate a namespace in this way is still encouraged, but is not explicitly defined by this specification.*
 
-ORNs also implement a more complex context component: `orn:<namespace>`. The differences between the syntax of ORNs and generic URIs are summarized here:
+ORNs also implement a more complex type component: `orn:<namespace>`. The differences between the syntax of ORNs and generic URIs are summarized here:
 ```
 <scheme>:<hierarchical-part>
 \______/ \_________________/
     |                |
- context         reference
+   type          reference
  ___|_________   ____|____
 /             \ /         \
 orn:<namespace>:<reference>
@@ -71,16 +74,16 @@ orn:<namespace>:<reference>
 
 ## Examples
 
-In the current version there are two example implementations of RID types: HTTP/S URLs and Slack objects. The HTTP/S scheme is the most commonly used form of URI and uses the standard RID parsing, where the scheme `http` or `https` is equal to the context, and the hierarchical part is equal to the reference. 
+In the current version there are two example implementations of RID types: HTTP/S URLs and Slack objects. The HTTP/S scheme is the most commonly used form of URI and uses the standard RID parsing, where the scheme `http` or `https` is equal to the type, and the hierarchical part is equal to the reference. 
 
 ```
-scheme  authority                  path
+scheme   authority                 path
  _|_     ____|___  _________________|___________________
 /   \   /        \/                                     \
 https://github.com/BlockScience/rid-lib/blob/v3/README.md
 \___/ \_________________________________________________/
   |                           |
-context                   reference
+ type                     reference
 ```
 
 The Slack objects are implemented as ORNs, and include workspaces, channels, messages, and users. The Slack message object's namespace is `slack.message` and its reference component is composed of three internal identifiers, the workspace id, channel id, and message id.
@@ -92,7 +95,7 @@ scheme namespace     team      channel      timestamp
 orn:slack.message:TA2E6KPK3/C07BKQX0EVC/1721669683.087619
 \_______________/ \_____________________________________/
         |                            |
-     context                     reference
+       type                      reference
 ```
 
 By representing Slack messages through ORNs, a stable identifier can be assigned to a resource which can be mapped to existing locators for different use cases. For example, a Slack message can be represented as a shareable link which redirects to the Slack app or in browser app: 
@@ -121,10 +124,10 @@ class RID:
 	# defined for namespaces schemes (ORN, URN, ...) only
 	namespace: str | None 
 
-	# "<scheme>:<namespace>" for namespaces schemes, otherwise equal to scheme component
+	# maintained for backwards compatibility, use `type()` instead
 	context: str
 
-	# the component after the context component
+	# the component after the type component
 	reference: str
 
 	@classmethod
@@ -135,12 +138,10 @@ class RID:
 	def from_reference(cls, string: str) -> RID: ...
 ```
 
-
-
 Example implementations can be found in [`src/rid_lib/types/`](https://github.com/BlockScience/rid-lib/tree/main/src/rid_lib/types).
 
 ### RID types
-This library treats both RIDs and RID types as first class objects. Behind the scenes, the `RIDType` base class is the metaclass for all RID type classes (which are created by inheriting from the `RID`, `ORN`, `URN` classes) -- so RID types are the classes, and RIDs are the instances of those classes. You can access the type of an RID using the built-in type function: `type(rid)`. All RIDs with the same context are guaranteed to share the same RID type class. Even if that RID type doesn't have any explicit class implementation, a class will be automatically generated for it.
+This library treats both RIDs and RID types as first class objects. Behind the scenes, the `RIDType` base class is the metaclass for all RID type classes (which are created by inheriting from the `RID`, `ORN`, `URN` classes) -- so RID types are the classes, and RIDs are the instances of those classes. You can access the type of an RID using the built-in type function: `type(rid)`. All RIDs with the same type are guaranteed to share the same RID type class. Even if that RID type doesn't have any explicit class implementation, a class will be automatically generated for it.
 
 ```python
 class RIDType(ABCMeta):
@@ -162,7 +163,8 @@ class RIDType(ABCMeta):
         return str(cls)
 ```
 
-The correct way to check the type of an RID is to check it's Python type. RID types can also be created using `RIDType.from_string`, which is also guaranteed to return the same class if the context component is the same.
+The preferred way of accessing the type of an RID is using the built in `type()` function. To get the string representation of an RID type, `str()` can be used, e.g., `str(type(rid))`. RID types can also be created with `RIDType.from_string`, which is also guaranteed to return the same class if the type component is the same.
+
 ```python
 from rid_lib import RID, RIDType
 from rid_lib.types import SlackMessage
@@ -229,7 +231,7 @@ pip install .
 
 ## Usage
 
-RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems. RID objects can be constructed from any RID string using the general constructor `RID.from_string`. The parser will match the string's context component and call the corresponding `from_reference` constructor. This can also be done directly on any RID type class via `MyRIDType.from_reference`. Finally, each context class provides a default constructor which requires each subcomponent to be indvidiually specified.
+RIDs are intended to be used as a lightweight, cross platform identifiers to facilitate communication between knowledge processing systems. RID objects can be constructed from any RID string using the general constructor `RID.from_string`. The parser will match the string's type component and call the corresponding `from_reference` constructor. This can also be done directly on any RID type class via `MyRIDType.from_reference`. Finally, each type class provides a default constructor which requires each subcomponent to be indvidiually specified.
 ```python
 from rid_lib import RID
 from rid_lib.types import SlackMessage
@@ -241,9 +243,9 @@ rid_obj3 = SlackMessage(team_id="TA2E6KPK3", channel_id="C07BKQX0EVC", ts="17216
 assert rid_obj1 == rid_obj2 == rid_obj3
 
 # guaranteed to be defined for all RID objects
-print(rid_obj1.scheme, rid_obj1.context, rid_obj1.reference)
+print(rid_obj1.scheme, str(type(rid_obj1)), rid_obj1.reference)
 
-# special parameters for the slack.message context
+# special parameters for the slack.message type
 print(rid_obj1.team_id, rid_obj1.channel_id, rid_obj1.ts)
 ```
 
@@ -331,83 +333,4 @@ class Cache:
 
     def delete(self, rid: RID) -> None: ...
     def drop(self) -> None: ...
-```
-
-## Effector
-
-*The effector has not been used or updated in awhile, it may be removed or refactored in the future.*
-
-The effector is the most abstract construct out of the rid-lib extensions. It acts as an "end effector", performing actions on/with RIDs. More concretely, it allows you to define and bind functions to a specific action type and RID context. The most obvious use case for this is as a dereferencer (and this use case has added functionality): a dereference function can be defined for different types of RIDs, and the effector will automatically choose the correct one to run based on the context of the RID passed in. Below are the accessible fields and methods of Effector.
-
-```python
-class Effector:
-	cache: Cache | None
-
-	# alias to 'execute', allows actions to be run by calling:
-	# effector.run.<action_type>(rid: RID, *args, **kwargs)
-	run: ProxyHandler
-
-    def __init__(self, cache: Cache | None = None): ...
-    
-	# decorator used to register actions to the effector:
-	# @effector.register(action_type, rid_type)
-    def register(
-        self, 
-        action_type: ActionType, 
-		# rid_type may be singular or multiple strings or RID type classes
-        rid_type: Type[RID] | str | tuple[Type[RID] | str]
-    ): ...
-    
-	# decorator used to register dereference actions to the effector
-	# (alias to 'register', sets action_type=ActionType.dereference)
-    def register_dereference(
-		self, 
-		rid_type: Type[RID] | str | tuple[Type[RID] | str]
-	): ...
-
-	def execute(
-		self, 
-		action_type: str, 
-		rid: RID, 
-		*args, 
-		**kwargs
-	): ...
-
-	# special handler for 'dereference' actions, returns a CacheBundle instead of dict, optionally interacts with cache
-	# note: different behavior than calling 'dereference' action with 'execute' or 'run'
-    def deref(
-        self, 
-        rid: RID, 
-        hit_cache=True, # tries to read cache first, writes to cache if there is a miss
-        refresh=False   # refreshes cache even if there was a hit
-    ) -> CacheBundle | None: ...
-
-```
-
-Registering and calling actions with an Effector:
-
-```python
-import requests
-from rid_lib import RID
-from rid_lib.ext import Cache, Effector, ActionType
-from rid_lib.types import HTTP, HTTPS
-
-cache = Cache("my_cache")
-effector = Effector(cache)
-
-@effector.register_dereference((HTTP, HTTPS))
-def dereference_url(url):
-	return requests.get(str(url)).json()
-
-my_url = RID.from_string("https://jsonplaceholder.typicode.com/todos/1")
-
-# equivalent actions, returns dict
-effector.execute(ActionType.dereference, url)
-effector.execute("dereference", url)
-effector.run.dereference(url)
-
-# special dereference handler, returns CacheBundle
-effector.deref(url)
-effector.deref(url, hit_cache=False)
-effector.deref(url, refresh=True)
 ```
