@@ -45,6 +45,10 @@ class RIDType(ABCMeta):
             raise TypeError(f"RID type '{name}' is missing implementation(s) for abstract method(s) {set(cls.__abstractmethods__)}")
         
         # save RID type to lookup table
+        if str(cls) in cls.type_table:
+            print(f"WARNING: RIDType {str(cls)} already exists, new definition WILL NOT overwrite existing type")
+            return mcls.type_table[str(cls)]
+            
         mcls.type_table[str(cls)] = cls
         return cls
     
