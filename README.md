@@ -4,31 +4,33 @@
 
 
 ### Jump to Sections: 
- - [RID Core](#rid-core)
+- [RID v3 Protocol](#rid-v3-protocol)
+		- [Jump to Sections:](#jump-to-sections)
+- [RID Core](#rid-core)
 	- [Introduction](#introduction)
 	- [Generic Syntax](#generic-syntax)
-	- [Object Reference Names](#object-reference-names-previously-rid-v2)
+	- [Object Reference Names (previously RID v2)](#object-reference-names-previously-rid-v2)
+	- [Examples](#examples)
 	- [Implementation](#implementation)
 		- [RID class](#rid-class)
 		- [RID types](#rid-types)
 		- [Creating your own types](#creating-your-own-types)
-		- [Pydantic compatibility](#pydantic-compatibility)
+		- [Pydantic Compatibility](#pydantic-compatibility)
 	- [Installation](#installation)
 	- [Usage](#usage)
 	- [Development](#development)
- - [RID Extensions](#rid-extensions)
+- [RID Extensions](#rid-extensions)
 	- [Introduction](#introduction-1)
 	- [Manifest](#manifest)
-	- [Event](#manifest)
+	- [Bundle](#bundle)
 	- [Cache](#cache)
-	- [Effector](#effector)
 
 # RID Core
 ## Introduction
 
 *Note: throughout this document the terms "resource", "digital object", and "knowledge object" are used roughly interchangeably.*
 
-Reference Identifiers (RIDs) identify references to resources primarily for usage within Knowledge Organization Infrastructure (KOI). The RID specification is informed by previous work on representing digital objects (see [Objects as Reference](https://blog.block.science/objects-as-reference-toward-robust-first-principles-of-digital-organization/)) in which objects are identified through a relationship between a reference and a referent. Under this model, RIDs are the *references*, and the resources they refer to are the *referents.* The *means of reference* describes the relationship between the reference and referent.
+Reference Identifiers (RIDs) identify references to resources primarily for usage within Knowledge Organization Infrastructure (KOI). The RID specification is informed by previous work on representing digital objects (see Objects as Reference) in which objects are identified through a relationship between a reference and a referent. Under this model, RIDs are the *references*, and the resources they refer to are the *referents.* The *means of reference* describes the relationship between the reference and referent.
 
 ```
 (reference) -[means of reference]-> (referent)
@@ -37,7 +39,7 @@ Reference Identifiers (RIDs) identify references to resources primarily for usag
 As opposed to Uniform Resource Identifiers (URIs), RIDs are not intended to have universal agreement or a centralized management structure. However, RIDs are compatible with URIs in that *all URIs can be valid RIDs*. [RFC 3986](https://www.rfc-editor.org/info/rfc3986) outlines the basic properties of an URI, adding that "a URI can be further classified as a locator, a name or both." Location and naming can be considered two different means of reference, or methods of linking a reference and referent(s), where:
 
 1. Locators identify resources by *where* they are, with the referent being defined as the resource retrieved via a defined access method. This type of identifier is less stable, and the resource at the specified location could change or become unavailable over time.
-3. Names identify resources by *what* they are, acting as a more stable, location independent identifier. Resources identified by name are not always intended to be accessed, but some may be resolvable to locators. While the mapping from name to locator may not be constant the broader relationship between reference and referent should be.
+2. Names identify resources by *what* they are, acting as a more stable, location independent identifier. Resources identified by name are not always intended to be accessed, but some may be resolvable to locators. While the mapping from name to locator may not be constant the broader relationship between reference and referent should be.
 ## Generic Syntax
 
 The generic syntax to compose an RID roughly mirrors URIS:
