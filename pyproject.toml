@@ -7,7 +7,7 @@ name = "rid-lib"
 version = "3.2.16"
 description = "Implementation of Reference Identifiers (RIDs) protocol in Python"
 authors = [
-    {name = "Luke Miller", email = "luke@block.science"}
+    {name = "Luke Miller", email = "luke@dynamicalsystemsgroup.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.10"
@@ -18,7 +18,7 @@ dependencies = ["pydantic>=2.10"]
 dev = ["pytest>=8.0", "pytest-cov>=6.0", "twine>=6.0", "build"]
 
 [project.urls]
-Homepage = "https://github.com/BlockScience/rid-lib/"
+Homepage = "https://github.com/DynamicalSystemsGroup/rid-lib/"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

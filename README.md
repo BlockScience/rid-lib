@@ -1,6 +1,6 @@
 # RID v3 Protocol
 
-*This specification can be understood as the third iteration of the RID protocol, or RID v3. Previous versions include [RID v1](https://github.com/BlockScience/kms-identity/blob/main/README.md) and [RID v2](https://github.com/BlockScience/rid-lib/blob/v2/README.md).*
+*This specification can be understood as the third iteration of the RID protocol, or RID v3. Previous versions include [RID v1](https://github.com/DynamicalSystemsGroup/kms-identity/blob/main/README.md) and [RID v2](https://github.com/DynamicalSystemsGroup/rid-lib/blob/v2/README.md).*
 
 
 ### Jump to Sections: 
@@ -47,7 +47,7 @@ The generic syntax to compose an RID roughly mirrors URIS:
 
 Conceptually, the reference refers to the referent, while the type provides context for how to interpret the reference, or how to discriminate it from another otherwise identical RID. While in many cases the type simply maps to a URI scheme, the type may also include part of the "hierarchical part" (right hand side of a URI following the scheme).
 
-*See [rid-registry](https://github.com/BlockScience/rid-registry) for a list of active RID types.*
+*See [rid-registry](https://github.com/DynamicalSystemsGroup/rid-registry) for a list of active RID types.*
 
 ## Object Reference Names (previously RID v2)
 
@@ -80,7 +80,7 @@ In the current version there are two example implementations of RID types: HTTP/
 scheme   authority                 path
  _|_     ____|___  _________________|___________________
 /   \   /        \/                                     \
-https://github.com/BlockScience/rid-lib/blob/v3/README.md
+https://github.com/DynamicalSystemsGroup/rid-lib/blob/v3/README.md
 \___/ \_________________________________________________/
   |                           |
  type                     reference
@@ -100,7 +100,7 @@ orn:slack.message:TA2E6KPK3/C07BKQX0EVC/1721669683.087619
 
 By representing Slack messages through ORNs, a stable identifier can be assigned to a resource which can be mapped to existing locators for different use cases. For example, a Slack message can be represented as a shareable link which redirects to the Slack app or in browser app: 
 ```
-https://blockscienceteam.slack.com/archives/C07BKQX0EVC/p1721669683087619
+https://<team-workspace>.slack.com/archives/C07BKQX0EVC/p1721669683087619
 ```
 There's also a "deep link" which can open the Slack app directly (but only to a channel):
 ```
@@ -138,7 +138,7 @@ class RID:
 	def from_reference(cls, string: str) -> RID: ...
 ```
 
-Example implementations can be found in [`src/rid_lib/types/`](https://github.com/BlockScience/rid-lib/tree/main/src/rid_lib/types).
+Example implementations can be found in [`src/rid_lib/types/`](https://github.com/DynamicalSystemsGroup/rid-lib/tree/main/src/rid_lib/types).
 
 ### RID types
 This library treats both RIDs and RID types as first class objects. Behind the scenes, the `RIDType` base class is the metaclass for all RID type classes (which are created by inheriting from the `RID`, `ORN`, `URN` classes) -- so RID types are the classes, and RIDs are the instances of those classes. You can access the type of an RID using the built-in type function: `type(rid)`. All RIDs with the same type are guaranteed to share the same RID type class. Even if that RID type doesn't have any explicit class implementation, a class will be automatically generated for it.
