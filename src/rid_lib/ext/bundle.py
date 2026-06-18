@@ -1,6 +1,6 @@
-from typing import TypeVar
+from typing import ClassVar, TypeVar
 from pydantic import BaseModel
-from rid_lib.core import RID
+from rid_lib.core import RID, RIDType
 from .manifest import Manifest
 
 
